@@ -62,9 +62,10 @@ namespace UT4UU.Installer.Common
 						}
 					}
 
-					if (isDoing == targetDo)
-						touchedTasks.Add(taskIndex);
 				}
+
+				if (isDoing == targetDo)
+					touchedTasks.Add(taskIndex);
 
 				if (isDoing)
 				{
