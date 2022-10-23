@@ -26,7 +26,7 @@ namespace UT4UU.Installer.Common
 			UpgradeEngineModules = true;
 			SourceLocation = string.Empty;
 			InstallLocation = string.Empty;
-			ReplacementSuffix = ".bak";
+			ReplacementSuffix = ".uu.bak";
 			PlatformTarget = PlatformTarget.Unknown;
 			BuildConfiguration = BuildConfiguration.Unknown;
 			Logger = null;
