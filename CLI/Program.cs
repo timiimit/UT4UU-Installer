@@ -168,8 +168,15 @@ namespace UT4UU.Installer.CLI
 					installLocation = args[1];
 				}
 
-
-				var options = Options.Load(GetInstallInfoFile(installLocation));
+				FileInfo fi = new FileInfo(GetInstallInfoFile("E:\\UT4Source\\UT4UU\\Source\\Programs\\Installer\\Files"));//installLocation));
+				if (!fi.Exists)
+				{
+					Console.WriteLine($"Could not find installation info file in '{fi.FullName}'");
+					return 1;
+				}
+				var options = Options.Load(fi.FullName);
+				options.Logger = new StreamWriter(Console.OpenStandardOutput());
+				options.Logger.AutoFlush = true;
 
 				OperationUninstall op = new OperationUninstall(options);
 				op.Do();

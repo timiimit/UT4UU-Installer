@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace UT4UU.Installer.Common
 {
-	internal class TaskDeleteDirectory
-	{
-	}
+	//public class TaskDeleteDirectory
+	//{
+	//}
 }

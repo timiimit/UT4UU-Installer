@@ -8,15 +8,14 @@ namespace UT4UU.Installer.Common
 {
 	public abstract class Task
 	{
-		public string Description { get; }
+		public string DescriptionDo { get; }
+		public string DescriptionUndo { get; }
 
-		public Task(string description)
+		public Task(string descriptionDo, string descriptionUndo)
 		{
-			Description = description;
+			DescriptionDo = descriptionDo;
+			DescriptionUndo = descriptionUndo;
 		}
-
-
-
 
 
 		/// <summary>
@@ -28,7 +27,6 @@ namespace UT4UU.Installer.Common
 		/// Undos the executed task, putting things into the state from before Do() was called
 		/// </summary>
 		public abstract void Undo();
-
 
 		/// <summary>
 		/// Called when all tasks have successfully finished

@@ -14,10 +14,10 @@ namespace UT4UU.Installer.Common
 		protected List<Task> tasks;
 		private bool doDirection;
 
-		public Operation(string description, Options options, bool direction) : base(description)
+		public Operation(string descriptionDo, string descriptionUndo, Options options, bool direction) : base(descriptionDo, descriptionUndo)
 		{
-			this.Options = options;
-			this.tasks = new List<Task>();
+			Options = options;
+			tasks = new List<Task>();
 			doDirection = direction;
 		}
 
@@ -28,23 +28,19 @@ namespace UT4UU.Installer.Common
 			int taskIndex = targetDo ? 0 : tasks.Count - 1;
 			while (true)
 			{
-				if (isDoing == targetDo)
-					Options.Logger?.WriteLine($"Do {tasks[taskIndex].Description}");
+				if (isDoing)
+					Options.Logger?.WriteLine(tasks[taskIndex].DescriptionDo);
 				else
-					Options.Logger?.WriteLine($"Undo {tasks[taskIndex].Description}");
+					Options.Logger?.WriteLine(tasks[taskIndex].DescriptionUndo);
 
 				if (!Options.IsDryRun)
 				{
 					try
 					{
 						if (isDoing)
-						{
 							tasks[taskIndex].Do();
-						}
 						else
-						{
 							tasks[taskIndex].Undo();
-						}
 					}
 					catch (Exception ex)
 					{

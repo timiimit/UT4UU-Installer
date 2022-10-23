@@ -10,7 +10,7 @@ namespace UT4UU.Installer.Common
 	{
 		private string directory;
 
-		public TaskCreateDirectory(string directory) : base($"Create directory '{directory}'")
+		public TaskCreateDirectory(string directory) : base($"Create directory '{directory}'", $"Delete directory '{directory}'")
 		{
 			this.directory = directory;
 		}

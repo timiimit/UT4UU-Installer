@@ -11,7 +11,7 @@ namespace UT4UU.Installer.Common
 		private string from;
 		private string to;
 
-		public TaskMoveFile(string from, string to) : base($"Move '{from}' to '{to}'")
+		public TaskMoveFile(string from, string to) : base($"Move '{from}' to '{to}'", $"Move '{to}' to '{from}'")
 		{
 			this.from = from;
 			this.to = to;

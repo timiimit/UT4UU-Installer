@@ -8,7 +8,7 @@ namespace UT4UU.Installer.Common
 {
 	public class OperationInstallation : Operation
 	{
-		public OperationInstallation(Options options, bool isInstalling) : base("Install UT4UU", options, isInstalling)
+		public OperationInstallation(Options options, bool isInstalling) : base("Install UT4UU", "Uninstall UT4UU", options, isInstalling)
 		{
 			string srcEngine = Path.Combine(options.SourceLocation, "Engine", "Binaries", options.PlatformTarget.ToString());
 			string srcPluginRoot = Path.Combine(options.SourceLocation, "UnrealTournament", "Plugins", "UT4UU");
@@ -43,7 +43,7 @@ namespace UT4UU.Installer.Common
 
 		private string GetModuleName(string moduleName)
 		{
-			return Helper.GetActualModuleName(moduleName, Options.BuildConfiguration, Options.PlatformTarget);
+			return Helper.GetActualModuleName(moduleName, Options.PlatformTarget, Options.BuildConfiguration);
 		}
 
 		private void AddReplaceModuleTask(string srcDir, string targetDir, string moduleName)
