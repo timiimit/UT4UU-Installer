@@ -23,6 +23,7 @@ namespace UT4UU.Installer.Common
 
 		private void InternalDo(bool targetDo)
 		{
+			List<int> touchedTasks = new List<int>();
 			bool isDoing = targetDo;
 			int taskIndex = targetDo ? 0 : tasks.Count - 1;
 			while (true)
@@ -51,7 +52,6 @@ namespace UT4UU.Installer.Common
 						if (isDoing)
 						{
 							Options.Logger?.WriteLine($"Undoing tasks...");
-							isDoing = false;
 
 							// do we want to Undo() currently failed task?
 							//continue;
@@ -61,6 +61,9 @@ namespace UT4UU.Installer.Common
 							Options.Logger?.WriteLine($"Ignoring exception, continuing to undo tasks...");
 						}
 					}
+
+					if (isDoing == targetDo)
+						touchedTasks.Add(taskIndex);
 				}
 
 				if (isDoing)
@@ -75,6 +78,14 @@ namespace UT4UU.Installer.Common
 					if (taskIndex < 0)
 						break;
 				}
+			}
+
+			for (int i = 0; i < touchedTasks.Count; i++)
+			{
+				if (isDoing)
+					tasks[touchedTasks[i]].FinishDo();
+				else
+					tasks[touchedTasks[i]].FinishUndo();
 			}
 		}
 

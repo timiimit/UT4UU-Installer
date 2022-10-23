@@ -6,25 +6,21 @@ using System.Threading.Tasks;
 
 namespace UT4UU.Installer.Common
 {
-	public enum PlatformTarget
+	public enum PlatformTarget : byte
 	{
+		Unknown,
 		Win64,
 		Linux,
-
-		//MIN = Win64,
-		//MAX = Linux
 	}
 
-	public enum BuildConfiguration
+	public enum BuildConfiguration : byte
 	{
+		Unknown,
 		Shipping,
 		ShippingServer,
 		DevelopmentEditor,
-
-		//MIN = Shipping,
-		//MAX = DevelopmentEditor
 	}
-	internal static class Helper
+	public static class Helper
 	{
 		internal static PlatformTarget[] GetPlatformTargets()
 		{
