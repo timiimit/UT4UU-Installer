@@ -1,0 +1,73 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace UT4UU.Installer.Common
+{
+	public class OperationInstallation : Operation
+	{
+		public OperationInstallation(Options options, bool isInstalling) : base("Install UT4UU", options, isInstalling)
+		{
+			string srcEngine = Path.Combine(options.SourceLocation, "Engine", "Binaries", options.PlatformTarget.ToString());
+			string srcPluginRoot = Path.Combine(options.SourceLocation, "UnrealTournament", "Plugins", "UT4UU");
+			string srcPlugin = Path.Combine(srcPluginRoot, "Binaries", options.PlatformTarget.ToString());
+
+			string dstEngine = Path.Combine(options.InstallLocation, "Engine", "Binaries", options.PlatformTarget.ToString());
+			string dstPluginRoot = Path.Combine(options.InstallLocation, "UnrealTournament", "Plugins", "UT4UU");
+			string dstPlugin = Path.Combine(dstPluginRoot, "Binaries", options.PlatformTarget.ToString());
+
+			tasks = new List<Task>();
+
+			// create needed tree structure
+			tasks.Add(new TaskCreateDirectory(dstPluginRoot));
+			tasks.Add(new TaskCreateDirectory(Path.Combine(dstPluginRoot, "Binaries")));
+			tasks.Add(new TaskCreateDirectory(dstPlugin));
+
+			// copy plugin files
+			AddCopyTask(dstPluginRoot, srcPluginRoot, "UT4UU.uplugin");
+			AddCopyTask(srcPlugin, dstPlugin, GetModuleName("UT4UU"));
+			AddCopyTask(srcPlugin, dstPlugin, GetModuleName("UT4UUHelper"));
+			AddCopyTask(srcPlugin, dstPlugin, GetModuleName("Funchook"));
+
+			if (options.UpgradeEngineModules)
+			{
+				AddReplaceModuleTask(srcEngine, dstEngine, "SSL");
+				AddReplaceModuleTask(srcEngine, dstEngine, "HTTP");
+				AddReplaceModuleTask(srcEngine, dstEngine, "XMPP");
+				AddReplaceModuleTask(srcEngine, dstEngine, "HttpNetworkReplayStreaming");
+			}
+		}
+
+		private string GetModuleName(string moduleName)
+		{
+			return Helper.GetActualModuleName("UT4UU", Options.BuildConfiguration, Options.PlatformTarget);
+		}
+
+		private void AddReplaceModuleTask(string srcDir, string targetDir, string moduleName)
+		{
+			if (string.IsNullOrWhiteSpace(Options.SuffixOfReplacedEngineModules))
+				throw new ArgumentOutOfRangeException(nameof(Options.SuffixOfReplacedEngineModules));
+
+			string filename = GetModuleName(moduleName);
+			tasks.Add(new TaskMoveFile(
+				Path.Combine(targetDir, filename),
+				Path.Combine(targetDir, filename + Options.SuffixOfReplacedEngineModules)
+			));
+			AddCopyTask(srcDir, targetDir, filename);
+		}
+
+		private void AddCopyTask(string srcDir, string dstDir, string filename)
+		{
+			if (Options.CreateSymbolicLinks)
+			{
+				throw new NotImplementedException();
+			}
+			else
+			{
+				tasks.Add(new TaskCopyFile(Path.Combine(srcDir, filename), Path.Combine(dstDir, filename)));
+			}
+		}
+	}
+}

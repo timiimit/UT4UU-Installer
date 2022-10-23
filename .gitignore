@@ -1,0 +1,12 @@
+# exclude visual studio (code) files
+.vs/
+.vscode/
+
+# exclude compiled and linked binaries
+bin/
+obj/
+Debug/
+Release/
+
+# exclude installation files
+Files/
