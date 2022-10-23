@@ -9,17 +9,76 @@ namespace UT4UU.Installer.CLI
 	{
 		static void PrintHelp()
 		{
-			Console.WriteLine($@"Syntax:
-	UT4UU.Installer.CLI Install
-	UT4UU.Installer.CLI Uninstall [UTInstallPath]
+			// simulate empty arguments to get default values
+			var o = new Options();
+			ParseArguments(new string[0], ref o);
+			Console.WriteLine($@"USAGE:
+	UT4UU.Installer.CLI <Install|Uninstall> [OPTIONS]
+
+DESCRIPTION:
+Install UT4UU into existing Unreal Tournament installation or
+uninstall previously installed UT4UU.
+
+Can be used for any executable associated with the game.
+This includes:
+    - windows game
+    - windows server
+    - windows editor
+    - linux game
+    - linux server
+
+Only latest released builds of the binaries are supported!
+This means that if you are using windows binaries from before
+2021 November update then you won't be able to install UT4UU.
+
+Not all options are taken into account when uninstalling.
+At installation InstallInfo.bin file is created which stores
+all information required for proper uninstallation.
+
+
+OPTIONS:
+    -d or --dry-run                   Only logs what is supposed to be happening. Does not actually
+                                      preform an installation. This is useful for debugging or just
+                                      seeing what will happen at installation.
+                                      (default: {o.IsDryRun})
+
+    -s or --symbolic-links            Create symbolic links instead of copying files
+                                      (default: {o.CreateSymbolicLinks})
+
+    -u or --upgrade-engine-modules    Upgrade engine's modules. This fixes friend list in the game.
+                                      (default: {o.UpgradeEngineModules})
+
+    -i or --install-path <path>       Specify installation directory. Should be either root directory
+                                      of the game, server or editor. If this is not specified then
+                                      installer will try to locate this directory on its own.
+                                      (default: {o.InstallLocation})
+
+	--source-path <path>              Specify the location of directory tree structure containing
+                                      installation files.
+                                      (default: {o.SourceLocation})
+
+	--replacement-suffix <suffix>     Specify the suffix for when original files are backed up.
+                                      Useful only in combination with -u.
+                                      (default: {o.ReplacementSuffix})
+
+	--platform-target <platform>      Overwrite automatically detected platform target of installation
+                                      directory. Not recommended for use.
+                                      Possible values: Win64, Linux
+                                      (default: {o.PlatformTarget})
+
+	--build-configuration <comnfig>   Overwrite automatically detected build configuration of
+                                      installation directory. Not recommended for use.
+                                      Possible values: Shipping, ShippingServer, DevelopmentEditor
+                                      (default: {o.BuildConfiguration})
 ");
 		}
 
 		private static int ParseArguments(string[] args, ref Options options)
 		{
 			//options.InstallLocation = Helper.TryFindInstallationLocation() ?? string.Empty;
-			options.SourceLocation = Path.GetDirectoryName(Assembly.GetEntryAssembly()?.Location) ?? string.Empty;
+			options.SourceLocation = Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly()?.Location) ?? Environment.CurrentDirectory, "Files");
 			options.Logger = new StreamWriter(Console.OpenStandardOutput());
+			options.Logger.AutoFlush = true;
 
 #if DEBUG
 			options.IsDryRun = true; // for debugging
@@ -32,20 +91,24 @@ namespace UT4UU.Installer.CLI
 				string arg = args[i].ToLower();
 				if (arg == "-d" || arg == "--dry-run")
 					options.IsDryRun = true;
-				if (arg == "-s" || arg == "--symbolic-links")
+				else if (arg == "-s" || arg == "--symbolic-links")
 					options.CreateSymbolicLinks = true;
-				if (arg == "-u" || arg == "--upgrade-engine-modules")
+				else if (arg == "-u" || arg == "--upgrade-engine-modules")
 					options.UpgradeEngineModules = true;
-				if (arg == "-i" || arg == "--install-path")
+				else if (arg == "-i" || arg == "--install-path")
 					options.InstallLocation = args[++i];
-				if (arg == "--source-path")
+				else if (arg == "--source-path")
 					options.SourceLocation = args[++i];
-				if (arg == "--replacement-suffix")
+				else if (arg == "--replacement-suffix")
 					options.ReplacementSuffix = args[++i];
-				if (arg == "--platform-target")
+				else if (arg == "--platform-target")
 					options.PlatformTarget = (PlatformTarget)Enum.Parse(typeof(PlatformTarget), args[++i]);
-				if (arg == "--build-configuration")
+				else if (arg == "--build-configuration")
 					options.BuildConfiguration = (BuildConfiguration)Enum.Parse(typeof(BuildConfiguration), args[++i]);
+				else
+				{
+					return 1;
+				}
 			}
 
 			string? detectedInstallLocation = Helper.TryFindInstallationLocation();
@@ -119,8 +182,6 @@ namespace UT4UU.Installer.CLI
 			// normalize paths
 			options.SourceLocation = new DirectoryInfo(options.SourceLocation).FullName;
 			options.InstallLocation = new DirectoryInfo(options.InstallLocation).FullName;
-			if (options.Logger != null)
-				options.Logger.AutoFlush = true;
 
 			return 0;
 		}
@@ -132,69 +193,58 @@ namespace UT4UU.Installer.CLI
 
 		static int Main(string[] args)
 		{
-			if (args[0].ToLower() == "install")
+			if (args.Length > 0)
 			{
 				Options options = new Options();
-
+				string command = args[0].ToLower();
 				string[] optionArguments = new string[args.Length - 1];
 				Array.Copy(args, 1, optionArguments, 0, optionArguments.Length);
-
 				int result = ParseArguments(optionArguments, ref options);
-				if (result != 0)
-					return result;
 
-				// create install info file which will be copied to installed plugin directory
-				if (!options.IsDryRun)
-					options.Save(GetInstallInfoFile(options.SourceLocation));
-
-				OperationInstall op = new OperationInstall(options);
-				op.Do();
-			}
-			else if (args[0].ToLower() == "uninstall")
-			{
-				string installLocation;
-				if (args.Length <= 1)
-				{
-					string? detectedInstallLocation = Helper.TryFindInstallationLocation();
-					if (detectedInstallLocation == null)
-					{
-						Console.WriteLine("Failed to find install location. Please specify it manually.");
-						return 1;
-					}
-					installLocation = detectedInstallLocation;
-				}
-				else
-				{
-					installLocation = args[1];
-				}
-
-				FileInfo fi = new FileInfo(GetInstallInfoFile("E:\\UT4Source\\UT4UU\\Source\\Programs\\Installer\\Files"));//installLocation));
-				if (!fi.Exists)
-				{
-					Console.WriteLine($"Could not find installation info file in '{fi.FullName}'");
-					return 1;
-				}
-				var options = Options.Load(fi.FullName);
 				options.Logger = new StreamWriter(Console.OpenStandardOutput());
 				options.Logger.AutoFlush = true;
 
-				OperationUninstall op = new OperationUninstall(options);
-				op.Do();
+				if (result == 0)
+				{
+					if (command == "install")
+					{
+						// create install info file which will be copied to installed plugin directory
+						if (!options.IsDryRun)
+							options.Save(GetInstallInfoFile(options.SourceLocation));
+
+						OperationInstall op = new OperationInstall(options);
+						op.Do();
+						return 0;
+					}
+					else if (command == "uninstall")
+					{
+						FileInfo fi = new FileInfo(GetInstallInfoFile(options.InstallLocation));
+						if (fi.Exists)
+						{
+							// read stored install info
+							var installInfo = Options.Load(fi.FullName);
+							installInfo.SourceLocation = options.SourceLocation;
+							installInfo.IsDryRun = options.IsDryRun;
+							installInfo.Logger = options.Logger;
+							options = installInfo;
+						}
+
+						if (fi.Exists || options.IsDryRun)
+						{
+							OperationUninstall op = new OperationUninstall(options);
+							op.Do();
+							return 0;
+						}
+						else
+						{
+							Console.WriteLine($"Could not find installation info file in '{fi.FullName}'");
+						}
+					}
+				}
 			}
-			else
-			{
-				PrintHelp();
-				return 1;
-			}
 
-			
-
-
-			//options.Logger.WriteLine($"Using PlatformTarget = {options.PlatformTarget} and BuildConfiguration = {options.BuildConfiguration}");
-
-
-
-			return 0;
+			PrintHelp();
+			return 1;
 		}
 	}
 }
