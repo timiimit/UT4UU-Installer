@@ -140,7 +140,7 @@ namespace UT4UU.Installer.Common
 			public int Depth;
 		}
 
-		public static string? SearchForDirectory(string folder, int depth, Regex pattern, Func<string, bool> matchValidator)
+		private static string? SearchForDirectory(string folder, int depth, Regex pattern, Func<string, bool> matchValidator)
 		{
 			Queue q = new Queue();
 			q.Enqueue(new QueueElement() { Folder = folder, Depth = 0 });
@@ -181,53 +181,6 @@ namespace UT4UU.Installer.Common
 			return null;
 		}
 
-		public static string GetUTExecutableFromInstallationDirectory(
-			string installDirectory,
-			PlatformTarget platformTarget,
-			BuildConfiguration buildConfiguration)
-		{
-			return Path.Combine(
-				installDirectory,
-				"Engine",
-				"Binaries",
-				platformTarget.ToString(),
-				GetGameExecutableName(platformTarget, buildConfiguration)
-			);
-		}
-
-		public static bool IsUTDirectory(
-			string directory,
-			PlatformTarget platformTarget,
-			BuildConfiguration buildConfiguration)
-		{
-			return File.Exists(GetUTExecutableFromInstallationDirectory(directory, platformTarget, buildConfiguration));
-		}
-
-		public static bool IsUTExecutable(
-			string file,
-			PlatformTarget platformTarget,
-			BuildConfiguration buildConfiguration)
-		{
-			//if (file.EndsWith(
-			//		Path.Combine(
-			//		"Engine",
-			//		"Binaries",
-			//		platformTarget.ToString(),
-			//		GetGameExecutableName(platformTarget, buildConfiguration))
-			//	) &&
-			if (File.Exists(file))
-			{
-				// simple file integrity validation
-				if (GetGameExecutableExpectedChecksum(platformTarget, buildConfiguration) == GetFileChecksum(file))
-				{
-					return true;
-				}
-			}
-			return false;
-		}
-
-
-
 		/////////////////////////////////////////////////////////////////////////////////////////
 		/////////////////////////////////////////////////////////////////////////////////////////
 		/////////////////////////////                    ////////////////////////////////////////
@@ -238,7 +191,37 @@ namespace UT4UU.Installer.Common
 		/////////////////////////////////////////////////////////////////////////////////////////
 		/////////////////////////////////////////////////////////////////////////////////////////
 
+		public static string GetUTExecutableFromInstallationDirectory(
+			string installDirectory, PlatformTarget platformTarget, BuildConfiguration buildConfiguration)
+		{
+			return Path.Combine(
+				installDirectory,
+				"Engine",
+				"Binaries",
+				platformTarget.ToString(),
+				GetGameExecutableName(platformTarget, buildConfiguration)
+			);
+		}
 
+		public static bool IsUTDirectory(string directory, PlatformTarget platformTarget, BuildConfiguration buildConfiguration)
+		{
+			return IsUTExecutable(
+				GetUTExecutableFromInstallationDirectory(directory, platformTarget, buildConfiguration),
+				platformTarget, buildConfiguration
+			);
+		}
+
+		public static bool IsUTExecutable(string file, PlatformTarget platformTarget, BuildConfiguration buildConfiguration)
+		{
+			if (File.Exists(file))
+			{
+				if (GetGameExecutableExpectedChecksum(platformTarget, buildConfiguration) == GetFileChecksum(file))
+				{
+					return true;
+				}
+			}
+			return false;
+		}
 
 		public static string GetActualModuleName(string nameOnly, PlatformTarget platformTarget, BuildConfiguration config)
 		{
