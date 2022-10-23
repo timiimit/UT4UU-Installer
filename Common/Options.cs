@@ -8,6 +8,7 @@ namespace UT4UU.Installer.Common
 {
 	public struct Options
 	{
+		public bool CreateShortcut { get; set; }
 		public bool IsDryRun { get; set; }
 		public bool CreateSymbolicLinks { get; set; }
 		public bool UpgradeEngineModules { get; set; }
@@ -21,9 +22,10 @@ namespace UT4UU.Installer.Common
 
 		public Options()
 		{
+			CreateShortcut = false;
 			IsDryRun = true;
 			CreateSymbolicLinks = false;
-			UpgradeEngineModules = true;
+			UpgradeEngineModules = false;
 			SourceLocation = string.Empty;
 			InstallLocation = string.Empty;
 			ReplacementSuffix = ".uu.bak";
@@ -36,6 +38,7 @@ namespace UT4UU.Installer.Common
 		{
 			using (var w = new BinaryWriter(new FileStream(filepath, FileMode.CreateNew, FileAccess.Write, FileShare.Read)))
 			{
+				w.Write(CreateShortcut);
 				w.Write(IsDryRun);
 				w.Write(CreateSymbolicLinks);
 				w.Write(UpgradeEngineModules);
@@ -52,6 +55,7 @@ namespace UT4UU.Installer.Common
 			var o = new Options();
 			using (var r = new BinaryReader(new FileStream(filepath, FileMode.Open, FileAccess.Read, FileShare.Read)))
 			{
+				o.CreateShortcut = r.ReadBoolean();
 				o.IsDryRun = r.ReadBoolean();
 				o.CreateSymbolicLinks = r.ReadBoolean();
 				o.UpgradeEngineModules = r.ReadBoolean();

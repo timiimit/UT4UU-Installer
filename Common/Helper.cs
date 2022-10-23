@@ -471,9 +471,5 @@ namespace UT4UU.Installer.Common
 
 			return false;
 		}
-
-
-
-
 	}
 }

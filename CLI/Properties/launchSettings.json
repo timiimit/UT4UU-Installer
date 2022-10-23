@@ -2,7 +2,7 @@
   "profiles": {
     "UT4UU.Installer.CLI": {
       "commandName": "Project",
-      "commandLineArgs": "uninstall"
+      "commandLineArgs": "install -d -s -u"
     }
   }
 }

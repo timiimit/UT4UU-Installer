@@ -45,20 +45,33 @@ namespace UT4UU.Installer.Common
 					catch (Exception ex)
 					{
 						Options.Logger?.WriteLine($"Caught exception: {ex}");
-						if (isDoing)
+						if (isDoing == targetDo)
 						{
-							Options.Logger?.WriteLine($"Undoing tasks...");
-
-							// do we want to Undo() currently failed task?
-							//continue;
+							if (tasks[taskIndex].CanFail)
+							{
+								Options.Logger?.WriteLine($"Continuing with tasks...");
+							}
+							else
+							{
+								Options.Logger?.WriteLine($"Undoing tasks...");
+								isDoing = !targetDo;
+							}
 						}
 						else
 						{
 							Options.Logger?.WriteLine($"Ignoring exception, continuing to undo tasks...");
 						}
 					}
-
 				}
+
+#if false //DEBUG
+				if (taskIndex == 10)
+				{
+					// simulate a fail
+					Options.Logger?.WriteLine($"Undoing tasks...");
+					isDoing = !targetDo;
+				}
+#endif
 
 				if (isDoing == targetDo)
 					touchedTasks.Add(taskIndex);

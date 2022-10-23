@@ -10,11 +10,13 @@ namespace UT4UU.Installer.Common
 	{
 		public string DescriptionDo { get; }
 		public string DescriptionUndo { get; }
+		public bool CanFail { get; set; }
 
 		public Task(string descriptionDo, string descriptionUndo)
 		{
 			DescriptionDo = descriptionDo;
 			DescriptionUndo = descriptionUndo;
+			CanFail = false;
 		}
 
 

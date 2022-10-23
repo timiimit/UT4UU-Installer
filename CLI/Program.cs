@@ -13,11 +13,19 @@ namespace UT4UU.Installer.CLI
 			var o = new Options();
 			ParseArguments(new string[0], ref o);
 			Console.WriteLine($@"USAGE:
-	UT4UU.Installer.CLI <Install|Uninstall> [OPTIONS]
+	UT4UU.Installer.CLI <install|uninstall> [OPTIONS]
 
 DESCRIPTION:
 Install UT4UU into existing Unreal Tournament installation or
 uninstall previously installed UT4UU.
+
+This tool is not designed to handle upgrading UT4UU.
+Please uninstall any previously installed version before
+attempting to install using this tool.
+
+For windows users: This will not preform an actual system 
+installation that can be then found in control panel or applist.
+It will only move files to proper locations.
 
 Can be used for any executable associated with the game.
 This includes:
@@ -29,7 +37,8 @@ This includes:
 
 Only latest released builds of the binaries are supported!
 This means that if you are using windows binaries from before
-2021 November update then you won't be able to install UT4UU.
+2021 November update, then you won't be able to (and shouldn't
+try to) install UT4UU.
 
 Not all options are taken into account when uninstalling.
 At installation InstallInfo.bin file is created which stores
@@ -37,36 +46,39 @@ all information required for proper uninstallation.
 
 
 OPTIONS:
-    -d or --dry-run                   Only logs what is supposed to be happening. Does not actually
-                                      preform an installation. This is useful for debugging or just
-                                      seeing what will happen at installation.
-                                      (default: {o.IsDryRun})
-
-    -s or --symbolic-links            Create symbolic links instead of copying files
-                                      (default: {o.CreateSymbolicLinks})
-
-    -u or --upgrade-engine-modules    Upgrade engine's modules. This fixes friend list in the game.
-                                      (default: {o.UpgradeEngineModules})
 
     -i or --install-path <path>       Specify installation directory. Should be either root directory
                                       of the game, server or editor. If this is not specified then
                                       installer will try to locate this directory on its own.
                                       (default: {o.InstallLocation})
 
-	--source-path <path>              Specify the location of directory tree structure containing
-                                      installation files.
-                                      (default: {o.SourceLocation})
+    -s or --shortcut                  Create a shortcut on desktop.
 
-	--replacement-suffix <suffix>     Specify the suffix for when original files are backed up.
+    -u or --upgrade-engine-modules    Upgrade engine's modules. This fixes friend list in the game.
+                                      (default: {o.UpgradeEngineModules})
+
+    -d or --dry-run                   Only logs what is supposed to be happening. Does not actually
+                                      preform an installation. This is useful for debugging or just
+                                      seeing what will happen at installation.
+                                      (default: {o.IsDryRun})
+
+    --replacement-suffix <suffix>     Specify the suffix for when original files are backed up.
                                       Useful only in combination with -u.
                                       (default: {o.ReplacementSuffix})
 
-	--platform-target <platform>      Overwrite automatically detected platform target of installation
+    -l or --symbolic-links            Create symbolic links instead of copying files
+                                      (default: {o.CreateSymbolicLinks})
+
+    --source-path <path>              Specify the location of directory tree structure containing
+                                      installation files.
+                                      (default: {o.SourceLocation})
+
+    --platform-target <platform>      Overwrite automatically detected platform target of installation
                                       directory. Not recommended for use.
                                       Possible values: Win64, Linux
                                       (default: {o.PlatformTarget})
 
-	--build-configuration <comnfig>   Overwrite automatically detected build configuration of
+    --build-configuration <config>    Overwrite automatically detected build configuration of
                                       installation directory. Not recommended for use.
                                       Possible values: Shipping, ShippingServer, DevelopmentEditor
                                       (default: {o.BuildConfiguration})
@@ -91,7 +103,9 @@ OPTIONS:
 				string arg = args[i].ToLower();
 				if (arg == "-d" || arg == "--dry-run")
 					options.IsDryRun = true;
-				else if (arg == "-s" || arg == "--symbolic-links")
+				else if (arg == "-s" || arg == "--shortcut")
+					options.CreateShortcut = true;
+				else if (arg == "-l" || arg == "--symbolic-links")
 					options.CreateSymbolicLinks = true;
 				else if (arg == "-u" || arg == "--upgrade-engine-modules")
 					options.UpgradeEngineModules = true;
@@ -193,13 +207,14 @@ OPTIONS:
 
 		static int Main(string[] args)
 		{
+			int result = 0;
 			if (args.Length > 0)
 			{
 				Options options = new Options();
 				string command = args[0].ToLower();
 				string[] optionArguments = new string[args.Length - 1];
 				Array.Copy(args, 1, optionArguments, 0, optionArguments.Length);
-				int result = ParseArguments(optionArguments, ref options);
+				result = ParseArguments(optionArguments, ref options);
 
 				options.Logger = new StreamWriter(Console.OpenStandardOutput());
 				options.Logger.AutoFlush = true;
@@ -214,7 +229,6 @@ OPTIONS:
 
 						OperationInstall op = new OperationInstall(options);
 						op.Do();
-						return 0;
 					}
 					else if (command == "uninstall")
 					{
@@ -233,7 +247,6 @@ OPTIONS:
 						{
 							OperationUninstall op = new OperationUninstall(options);
 							op.Do();
-							return 0;
 						}
 						else
 						{
@@ -242,9 +255,14 @@ OPTIONS:
 					}
 				}
 			}
+			else
+			{
+				result = 1;
+			}
 
-			PrintHelp();
-			return 1;
+			if (result != 0)
+				PrintHelp();
+			return result;
 		}
 	}
 }

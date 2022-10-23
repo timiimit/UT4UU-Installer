@@ -27,7 +27,6 @@ namespace UT4UU.Installer.Common
 
 			// copy plugin files
 			AddCopyTask(srcPluginRoot, dstPluginRoot, "UT4UU.uplugin");
-			AddCopyTask(srcPluginRoot, dstPluginRoot, "InstallInfo.bin");
 			AddCopyTask(srcPlugin, dstPlugin, GetModuleName("UT4UU"));
 			AddCopyTask(srcPlugin, dstPlugin, GetModuleName("UT4UUHelper"));
 			AddCopyTask(srcPlugin, dstPlugin, GetModuleName("Funchook"));
@@ -39,6 +38,24 @@ namespace UT4UU.Installer.Common
 				AddReplaceModuleTask(srcEngine, dstEngine, "XMPP");
 				AddReplaceModuleTask(srcEngine, dstEngine, "HttpNetworkReplayStreaming");
 			}
+
+			if (options.CreateShortcut)
+			{
+				// TODO: Environment.SpecialFolder.Desktop might not get correct value each time
+				string desktop = Environment.GetFolderPath(Environment.SpecialFolder.Desktop, Environment.SpecialFolderOption.None);
+				if (!string.IsNullOrEmpty(desktop))
+				{
+					string exeName = Helper.GetGameExecutableName(options.PlatformTarget, options.BuildConfiguration);
+					tasks.Add(new TaskCreateDesktopShortcut(
+						Path.Combine(dstEngine, exeName),
+						"UnrealTournament -epicapp=UnrealTournamentDev -epicenv=Prod -EpicPortal",
+						"Unreal Tournament 4 UU",
+						"Run Unreal Tournament 4 as if it was ran from Epic Games Launcher"
+					) { CanFail = true });
+				}
+			}
+
+			AddCopyTask(srcPluginRoot, dstPluginRoot, "InstallInfo.bin");
 		}
 
 		private string GetModuleName(string moduleName)
@@ -63,7 +80,7 @@ namespace UT4UU.Installer.Common
 		{
 			if (Options.CreateSymbolicLinks)
 			{
-				throw new NotImplementedException();
+				tasks.Add(new TaskCreateSymbolicLink(Path.Combine(dstDir, filename), Path.Combine(srcDir, filename)));
 			}
 			else
 			{
