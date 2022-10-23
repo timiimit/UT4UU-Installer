@@ -26,8 +26,8 @@ namespace UT4UU.Installer.Common
 			tasks.Add(new TaskCreateDirectory(dstPlugin));
 
 			// copy plugin files
-			AddCopyTask(dstPluginRoot, srcPluginRoot, "UT4UU.uplugin");
-			AddCopyTask(dstPluginRoot, srcPluginRoot, "InstallInfo.bin");
+			AddCopyTask(srcPluginRoot, dstPluginRoot, "UT4UU.uplugin");
+			AddCopyTask(srcPluginRoot, dstPluginRoot, "InstallInfo.bin");
 			AddCopyTask(srcPlugin, dstPlugin, GetModuleName("UT4UU"));
 			AddCopyTask(srcPlugin, dstPlugin, GetModuleName("UT4UUHelper"));
 			AddCopyTask(srcPlugin, dstPlugin, GetModuleName("Funchook"));
@@ -43,7 +43,7 @@ namespace UT4UU.Installer.Common
 
 		private string GetModuleName(string moduleName)
 		{
-			return Helper.GetActualModuleName("UT4UU", Options.BuildConfiguration, Options.PlatformTarget);
+			return Helper.GetActualModuleName(moduleName, Options.BuildConfiguration, Options.PlatformTarget);
 		}
 
 		private void AddReplaceModuleTask(string srcDir, string targetDir, string moduleName)

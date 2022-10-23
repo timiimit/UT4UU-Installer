@@ -18,7 +18,7 @@ namespace UT4UU.Installer.CLI
 		private static int ParseArguments(string[] args, ref Options options)
 		{
 			//options.InstallLocation = Helper.TryFindInstallationLocation() ?? string.Empty;
-			options.SourceLocation = Assembly.GetEntryAssembly()?.Location ?? string.Empty;
+			options.SourceLocation = Path.GetDirectoryName(Assembly.GetEntryAssembly()?.Location) ?? string.Empty;
 			options.Logger = new StreamWriter(Console.OpenStandardOutput());
 
 #if DEBUG
@@ -48,10 +48,10 @@ namespace UT4UU.Installer.CLI
 					options.BuildConfiguration = (BuildConfiguration)Enum.Parse(typeof(BuildConfiguration), args[++i]);
 			}
 
-			string detectedInstallLocation = Helper.TryFindInstallationLocation() ?? string.Empty;
+			string? detectedInstallLocation = Helper.TryFindInstallationLocation();
 			if (string.IsNullOrWhiteSpace(options.InstallLocation))
 			{
-				if (string.IsNullOrWhiteSpace(detectedInstallLocation))
+				if (detectedInstallLocation == null)
 				{
 					options.Logger.WriteLine("Failed to find install location. Please specify it manually.");
 					return 1;
@@ -75,12 +75,12 @@ namespace UT4UU.Installer.CLI
 				options.Logger.WriteLine("PlatformTarget is unknown.");
 				return 1;
 			}
-			if (options.PlatformTarget != PlatformTarget.Unknown && options.BuildConfiguration == BuildConfiguration.Unknown)
+			else if (options.PlatformTarget != PlatformTarget.Unknown && options.BuildConfiguration == BuildConfiguration.Unknown)
 			{
 				options.Logger.WriteLine("BuildConfiguration is unknown.");
 				return 1;
 			}
-			if (options.PlatformTarget == PlatformTarget.Unknown && options.BuildConfiguration == BuildConfiguration.Unknown)
+			else if (options.PlatformTarget == PlatformTarget.Unknown && options.BuildConfiguration == BuildConfiguration.Unknown)
 			{
 				PlatformTarget pt = PlatformTarget.Unknown;
 				BuildConfiguration bc = BuildConfiguration.Unknown;
@@ -95,7 +95,7 @@ namespace UT4UU.Installer.CLI
 					return 1;
 				}
 			}
-			if (options.PlatformTarget != PlatformTarget.Unknown && options.BuildConfiguration != BuildConfiguration.Unknown)
+			else if (options.PlatformTarget != PlatformTarget.Unknown && options.BuildConfiguration != BuildConfiguration.Unknown)
 			{
 				PlatformTarget pt = PlatformTarget.Unknown;
 				BuildConfiguration bc = BuildConfiguration.Unknown;
@@ -115,6 +115,12 @@ namespace UT4UU.Installer.CLI
 					options.Logger.WriteLine("WARNING: Failed to detect PlatformTarget and BuildConfiguration.");
 				}
 			}
+
+			// normalize paths
+			options.SourceLocation = new DirectoryInfo(options.SourceLocation).FullName;
+			options.InstallLocation = new DirectoryInfo(options.InstallLocation).FullName;
+			if (options.Logger != null)
+				options.Logger.AutoFlush = true;
 
 			return 0;
 		}
@@ -143,8 +149,6 @@ namespace UT4UU.Installer.CLI
 
 				OperationInstall op = new OperationInstall(options);
 				op.Do();
-
-
 			}
 			else if (args[0].ToLower() == "uninstall")
 			{

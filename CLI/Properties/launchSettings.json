@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "UT4UU.Installer.CLI": {
+      "commandName": "Project",
+      "commandLineArgs": "uninstall"
+    }
+  }
+}
