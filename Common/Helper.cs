@@ -471,5 +471,40 @@ namespace UT4UU.Installer.Common
 
 			return false;
 		}
+
+		public static string GetInstallInfoFile(string installLocation)
+		{
+			return Path.Combine(installLocation, "UnrealTournament", "Plugins", "UT4UU", "InstallInfo.bin");
+		}
+
+		public static bool IsUT4UUInstalled(string installLocation)
+		{
+			string installInfoFile = GetInstallInfoFile(installLocation);
+			if (Directory.Exists(Path.GetDirectoryName(installInfoFile)))
+				return true;
+			return false;
+		}
+
+		public static string? GetUT4UUInstalledVersion(string installLocation)
+		{
+			// search uplugin for version name
+			string uplugin = Path.Combine(installLocation, "UnrealTournament", "Plugins", "UT4UU", "UT4UU.uplugin");
+			if (!File.Exists(uplugin))
+				return null;
+
+			string content = File.ReadAllText(uplugin);
+			Match match = Regex.Match(content, "\"VersionName\"\\s*:\\s*\"(.+?)\"");
+			if (match.Success && match.Groups.Count == 2)
+			{
+				return match.Groups[1].Value;
+			}
+			return null;
+		}
+
+		public static string GetUT4UUMainModuleHash(string installLocation, PlatformTarget platformTarget, BuildConfiguration buildConfiguration)
+		{
+			return GetFileChecksum(Path.Combine(installLocation, "UnrealTournament", "Plugins", "UT4UU", "Binaries",
+				platformTarget.ToString(), GetActualModuleName("UT4UU", platformTarget, buildConfiguration)));
+		}
 	}
 }

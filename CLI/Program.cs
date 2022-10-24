@@ -200,11 +200,6 @@ OPTIONS:
 			return 0;
 		}
 
-		private static string GetInstallInfoFile(string installLocation)
-		{
-			return Path.Combine(installLocation, "UnrealTournament", "Plugins", "UT4UU", "InstallInfo.bin");
-		}
-
 		static int Main(string[] args)
 		{
 			int result = 0;
@@ -225,14 +220,14 @@ OPTIONS:
 					{
 						// create install info file which will be copied to installed plugin directory
 						if (!options.IsDryRun)
-							options.Save(GetInstallInfoFile(options.SourceLocation));
+							options.Save(Helper.GetInstallInfoFile(options.SourceLocation));
 
 						OperationInstall op = new OperationInstall(options);
 						op.Do();
 					}
 					else if (command == "uninstall")
 					{
-						FileInfo fi = new FileInfo(GetInstallInfoFile(options.InstallLocation));
+						FileInfo fi = new FileInfo(Helper.GetInstallInfoFile(options.InstallLocation));
 						if (fi.Exists)
 						{
 							// read stored install info
