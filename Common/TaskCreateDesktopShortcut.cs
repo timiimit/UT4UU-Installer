@@ -30,10 +30,10 @@ namespace UT4UU.Installer.Common
 		{
 			get
 			{
-				string? dir = DesktopDirectory;
-				if (dir == null)
-					return null;
-				return Path.Combine(dir, Filename);
+				//string? dir = DesktopDirectory;
+				//if (dir == null)
+				//	return null;
+				return Path.Combine(DesktopDirectory, Filename);
 			}
 		}
 
