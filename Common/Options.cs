@@ -17,13 +17,17 @@ namespace UT4UU.Installer.Common
 		public string ReplacementSuffix { get; set; }
 		public PlatformTarget PlatformTarget { get; set; }
 		public BuildConfiguration BuildConfiguration { get; set; }
-		public StreamWriter? Logger { get; set; }
+		public Action<string, int, int>? Logger { get; set; }
 
 
 		public Options()
 		{
 			CreateShortcut = false;
+#if DEBUG
 			IsDryRun = true;
+#else
+			IsDryRun = false;
+#endif
 			CreateSymbolicLinks = false;
 			UpgradeEngineModules = false;
 			SourceLocation = string.Empty;

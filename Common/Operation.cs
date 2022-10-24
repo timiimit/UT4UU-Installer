@@ -10,6 +10,8 @@ namespace UT4UU.Installer.Common
 	{
 		public Options Options { get; private set; }
 
+		public int TaskCount { get => tasks.Count; }
+
 
 		protected List<Task> tasks;
 		private bool doDirection;
@@ -29,9 +31,9 @@ namespace UT4UU.Installer.Common
 			while (true)
 			{
 				if (isDoing)
-					Options.Logger?.WriteLine(tasks[taskIndex].DescriptionDo);
+					Options.Logger?.Invoke(tasks[taskIndex].DescriptionDo, taskIndex, TaskCount);
 				else
-					Options.Logger?.WriteLine(tasks[taskIndex].DescriptionUndo);
+					Options.Logger?.Invoke(tasks[taskIndex].DescriptionUndo, taskIndex, TaskCount);
 
 				if (!Options.IsDryRun)
 				{
@@ -44,22 +46,22 @@ namespace UT4UU.Installer.Common
 					}
 					catch (Exception ex)
 					{
-						Options.Logger?.WriteLine($"Caught exception: {ex}");
+						Options.Logger?.Invoke($"Task {taskIndex} failed: {ex.Message}", taskIndex, TaskCount);
 						if (isDoing == targetDo)
 						{
 							if (tasks[taskIndex].CanFail)
 							{
-								Options.Logger?.WriteLine($"Continuing with tasks...");
+								Options.Logger?.Invoke($"Continuing with tasks...", taskIndex, TaskCount);
 							}
 							else
 							{
-								Options.Logger?.WriteLine($"Undoing tasks...");
+								Options.Logger?.Invoke($"Undoing tasks...", taskIndex, TaskCount);
 								isDoing = !targetDo;
 							}
 						}
 						else
 						{
-							Options.Logger?.WriteLine($"Ignoring exception, continuing to undo tasks...");
+							Options.Logger?.Invoke($"Ignoring exception, continuing to undo tasks...", taskIndex, TaskCount);
 						}
 					}
 				}
@@ -88,6 +90,8 @@ namespace UT4UU.Installer.Common
 					if (taskIndex < 0)
 						break;
 				}
+
+				Thread.Sleep(1000);
 			}
 
 			for (int i = 0; i < touchedTasks.Count; i++)
@@ -97,6 +101,10 @@ namespace UT4UU.Installer.Common
 				else
 					tasks[touchedTasks[i]].FinishUndo();
 			}
+
+			string whatHappened = isDoing == targetDo ? "Completed" : "Aborted";
+			string taskDescripion = targetDo ? DescriptionDo : DescriptionUndo;
+			Options.Logger?.Invoke($"{whatHappened} Task: {taskDescripion}", taskIndex, TaskCount);
 		}
 
 		public override void Do()

@@ -1,6 +1,7 @@
 ﻿
 
 using System.Reflection;
+using System.Threading.Tasks;
 using UT4UU.Installer.Common;
 
 namespace UT4UU.Installer.CLI
@@ -89,8 +90,10 @@ OPTIONS:
 		{
 			//options.InstallLocation = Helper.TryFindInstallationLocation() ?? string.Empty;
 			options.SourceLocation = Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly()?.Location) ?? Environment.CurrentDirectory, "Files");
-			options.Logger = new StreamWriter(Console.OpenStandardOutput());
-			options.Logger.AutoFlush = true;
+			options.Logger = (string message, int taskIndex, int taskCount) =>
+			{
+				Console.WriteLine(message);
+			};
 
 #if DEBUG
 			options.IsDryRun = true; // for debugging
@@ -130,7 +133,7 @@ OPTIONS:
 			{
 				if (detectedInstallLocation == null)
 				{
-					options.Logger.WriteLine("Failed to find install location. Please specify it manually.");
+					options.Logger.Invoke("Failed to find install location. Please specify it manually.", 0, 0);
 					return 1;
 				}
 				options.InstallLocation = detectedInstallLocation;
@@ -149,12 +152,12 @@ OPTIONS:
 
 			if (options.PlatformTarget == PlatformTarget.Unknown && options.BuildConfiguration != BuildConfiguration.Unknown)
 			{
-				options.Logger.WriteLine("PlatformTarget is unknown.");
+				options.Logger.Invoke("PlatformTarget is unknown.", 0, 0);
 				return 1;
 			}
 			else if (options.PlatformTarget != PlatformTarget.Unknown && options.BuildConfiguration == BuildConfiguration.Unknown)
 			{
-				options.Logger.WriteLine("BuildConfiguration is unknown.");
+				options.Logger.Invoke("BuildConfiguration is unknown.", 0, 0);
 				return 1;
 			}
 			else if (options.PlatformTarget == PlatformTarget.Unknown && options.BuildConfiguration == BuildConfiguration.Unknown)
@@ -168,7 +171,7 @@ OPTIONS:
 				}
 				else
 				{
-					options.Logger.WriteLine("Failed to detect PlatformTarget and BuildConfiguration.");
+					options.Logger.Invoke("Failed to detect PlatformTarget and BuildConfiguration.", 0, 0);
 					return 1;
 				}
 			}
@@ -180,16 +183,16 @@ OPTIONS:
 				{
 					if (pt != options.PlatformTarget)
 					{
-						options.Logger.WriteLine($"WARNING: Detected PlatformTarget ({pt}) does not match the specified one");
+						options.Logger.Invoke($"WARNING: Detected PlatformTarget ({pt}) does not match the specified one", 0, 0);
 					}
 					if (bc != options.BuildConfiguration)
 					{
-						options.Logger.WriteLine($"WARNING: Detected BuildConfiguration ({bc}) does not match the specified one");
+						options.Logger.Invoke($"WARNING: Detected BuildConfiguration ({bc}) does not match the specified one", 0, 0);
 					}
 				}
 				else
 				{
-					options.Logger.WriteLine("WARNING: Failed to detect PlatformTarget and BuildConfiguration.");
+					options.Logger.Invoke("WARNING: Failed to detect PlatformTarget and BuildConfiguration.", 0, 0);
 				}
 			}
 
@@ -210,9 +213,6 @@ OPTIONS:
 				string[] optionArguments = new string[args.Length - 1];
 				Array.Copy(args, 1, optionArguments, 0, optionArguments.Length);
 				result = ParseArguments(optionArguments, ref options);
-
-				options.Logger = new StreamWriter(Console.OpenStandardOutput());
-				options.Logger.AutoFlush = true;
 
 				if (result == 0)
 				{
@@ -245,7 +245,7 @@ OPTIONS:
 						}
 						else
 						{
-							Console.WriteLine($"Could not find installation info file in '{fi.FullName}'");
+							options.Logger?.Invoke($"Could not find installation info file in '{fi.FullName}'", 0, 0);
 						}
 					}
 				}

@@ -64,9 +64,9 @@ namespace UT4UU.Installer.Common
 				throw new ArgumentOutOfRangeException(nameof(Options.ReplacementSuffix));
 
 			string filename = GetModuleName(moduleName);
-			tasks.Add(new TaskMoveFile(
+			tasks.Add(new TaskRenameFile(
 				Path.Combine(targetDir, filename),
-				Path.Combine(targetDir, filename + Options.ReplacementSuffix)
+				filename + Options.ReplacementSuffix
 			));
 			AddCopyTask(srcDir, targetDir, filename);
 		}

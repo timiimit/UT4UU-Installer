@@ -485,7 +485,7 @@ namespace UT4UU.Installer.Common
 			return false;
 		}
 
-		public static string? GetUT4UUInstalledVersion(string installLocation)
+		public static string? GetUT4UUInstalledVersionName(string installLocation)
 		{
 			// search uplugin for version name
 			string uplugin = Path.Combine(installLocation, "UnrealTournament", "Plugins", "UT4UU", "UT4UU.uplugin");
@@ -505,6 +505,32 @@ namespace UT4UU.Installer.Common
 		{
 			return GetFileChecksum(Path.Combine(installLocation, "UnrealTournament", "Plugins", "UT4UU", "Binaries",
 				platformTarget.ToString(), GetActualModuleName("UT4UU", platformTarget, buildConfiguration)));
+		}
+
+		public static bool IsExpectedUT4UUVersionInstalled(string installLocation, string sourceLocation)
+		{
+			if (!IsUT4UUInstalled(installLocation))
+				return false;
+
+			string commonSubpath = Path.Combine("UnrealTourament", "Plugins", "UT4UU", "Binaries");
+
+			string installDir = Path.Combine(installLocation, commonSubpath);
+			string sourceDir = Path.Combine(sourceLocation, commonSubpath);
+
+
+			var enumOptions = new EnumerationOptions() { RecurseSubdirectories = true };
+			var allFilesEnumeration = Directory.EnumerateFiles(sourceDir, "*.dll", enumOptions)
+				.Concat(Directory.EnumerateFiles(sourceDir, "*.so", enumOptions));
+			foreach (var fileSource in allFilesEnumeration)
+			{
+				string fileInstall = fileSource.Replace(sourceDir, installDir);
+				if (!File.Exists(fileInstall))
+					continue;
+
+				if (GetFileChecksum(fileSource) != GetFileChecksum(fileInstall))
+					return false; // at least one file does not match, assume to be incorrect
+			}
+			return true;
 		}
 	}
 }
