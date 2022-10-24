@@ -14,7 +14,6 @@ using System.IO;
 using System.Reflection;
 using System.Reflection.Metadata;
 using UT4UU.Installer.Common;
-using UT4UU.Installer.GUI.Models;
 
 namespace UT4UU.Installer.GUI.ViewModels
 {
@@ -174,7 +173,11 @@ namespace UT4UU.Installer.GUI.ViewModels
 			SelectedPageIndex = int.Parse(index);
 			if (SelectedPageIndex == 2)
 			{
-				Dispatcher.UIThread.Post(() => StartProperOperation(), DispatcherPriority.Background);
+				Dispatcher.UIThread.Post(async () =>
+				{
+					await System.Threading.Tasks.Task.Run(StartProperOperation);
+				}
+				, DispatcherPriority.Background);
 			}
 		}
 
@@ -236,7 +239,7 @@ namespace UT4UU.Installer.GUI.ViewModels
 			this.RaisePropertyChanged("UT4UUVersionText");
 		}
 
-		private async void StartProperOperation()
+		private void StartProperOperation()
 		{
 			if (!IsValidInstallLocation)
 			{
@@ -253,7 +256,8 @@ namespace UT4UU.Installer.GUI.ViewModels
 				);
 				if (installOptions.IsDryRun || isHandlableUT4UUInstalled)
 				{
-					await Dispatcher.UIThread.InvokeAsync(() => PerformAction(false), DispatcherPriority.Background);
+					operation = new OperationUninstall(installOptions);
+					operation.Do();
 				}
 				else
 				{
@@ -278,21 +282,18 @@ namespace UT4UU.Installer.GUI.ViewModels
 				);
 				if (installOptions.IsDryRun || isUTDir)
 				{
-					await Dispatcher.UIThread.InvokeAsync(() => PerformAction(true), DispatcherPriority.Background);
+					operation = new OperationInstall(installOptions);
+					operation.Do();
 				}
 				else
 				{
-					ErrorMessage = $"";
+					ErrorMessage = $"Tried to install into non-UT4 related directory";
 					SelectedPageIndex = 0;
 					return;
 				}
 			}
-		}
 
-		private void PerformAction(bool isInstallation)
-		{
-			operation = new OperationInstallation(installOptions, isInstallation);
-			operation.Do();
+			operation = null;
 		}
 	}
 }

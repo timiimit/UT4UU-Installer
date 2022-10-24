@@ -113,7 +113,6 @@
 				</StackPanel>
 			</Panel>
 			<Panel>
-				<!--Grid RowDefinitions="1*,Auto,Auto,Auto,3*"-->
 				<Grid RowDefinitions="Auto,1*,Auto">
 					<ProgressBar Margin="10" Grid.Row="0" Minimum="0.0" Maximum="1.0" Value="{Binding Progress}"/>
 					<ListBox Margin="10" Grid.Row="1" Items="{Binding LogMessages, Mode=OneWay}">
@@ -128,7 +127,6 @@
 						<TextBlock Text="Finish" />
 					</Button>
 				</Grid>
-				<!--/Grid-->
 			</Panel>
 		</Carousel.Items>
 		
