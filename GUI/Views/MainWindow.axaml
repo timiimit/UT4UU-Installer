@@ -1,0 +1,83 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:UT4UU.Installer.GUI.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+		xmlns:sys="clr-namespace:System;assembly=mscorlib"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="UT4UU.Installer.GUI.Views.MainWindow"
+        Icon="/Assets/avalonia-logo.ico"
+        Title="UT4UU Installer"
+		Width="800" Height="450">
+	<Window.Styles>
+	</Window.Styles>
+
+    <Design.DataContext>
+        <vm:MainWindowViewModel/>
+    </Design.DataContext>
+
+	<Carousel Margin="100,50,100,50" Name="switcher" SelectedIndex="{Binding SelectedPageIndex, Mode=OneWay}">
+		<Carousel.Items>
+				<Grid Name="pnlMain" RowDefinitions="1*,Auto,1*">
+					<Grid Grid.Row="0">
+						<TextBlock Grid.Row="0" FontSize="48" HorizontalAlignment="Center" VerticalAlignment="Center">
+							UT4UU Installer
+						</TextBlock>
+					</Grid>
+
+					<Grid Grid.Row="1">
+						<StackPanel>
+							<TextBlock Grid.Row="0" Margin="10" TextWrapping="Wrap" xml:space="default">
+								Please enter the location where game, server or editor was installed. By default all new features that UT4UU provides will be installed. Feel free to customize your installation.
+							</TextBlock>
+							<TextBlock Grid.Row="0" Margin="10" TextWrapping="Wrap" xml:space="default">
+								To Uninstall, enter the location where UT4UU was previously installed.
+							</TextBlock>
+							<Grid ColumnDefinitions="1*,Auto">
+								<TextBox Grid.Column="0" Margin="10" Watermark="{Binding InstallLocationWatermark}" Text="{Binding InstallLocation}" />
+								<Button Grid.Column="1">
+									<TextBlock Text="Browse" />
+								</Button>
+							</Grid>
+
+						</StackPanel>
+					</Grid>
+
+					<Grid Grid.Row="2" ColumnDefinitions="1*,2*,1*,2*,1*">
+						<Button Grid.Column="1" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center">
+							<TextBlock Text="Install"/>
+						</Button>
+						<Button Grid.Column="3" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+								Command="{Binding SwitchToPage}" CommandParameter="1">
+							<TextBlock Text="Customize"/>
+						</Button>
+					</Grid>
+				</Grid>
+				<Panel Name="pnlSettings" HorizontalAlignment="Center" VerticalAlignment="Center">
+					<StackPanel Spacing="20">
+						<CheckBox IsChecked="{Binding IsDryRun}" ToolTip.Tip="Useful to just see what will happen during (un)installation">
+							<TextBlock>Only perform a simulation of (un)installation</TextBlock>
+						</CheckBox>
+						<CheckBox IsChecked="{Binding UpgradeEngineModules}" ToolTip.Tip="Upgrades the following engine modules: HTTP, SSL, HttpNetworkReplayStreaming, XMPP">
+							<TextBlock TextWrapping="Wrap">Fix all social features that got broken over the years</TextBlock>
+						</CheckBox>
+						<Grid ColumnDefinitions="Auto,1*">
+							<TextBlock Margin="10,0" VerticalAlignment="Center">Replacement suffix: </TextBlock>
+							<TextBox Grid.Column="1" Text="{Binding ReplacementSuffix, Mode=TwoWay}">
+								<ToolTip.Tip>
+									Any original file that is to be replaced during installation, will instead be renamed such that this suffix will be appended to the end of the filename
+								</ToolTip.Tip>
+							</TextBox>
+						</Grid>
+						<Grid ColumnDefinitions="*,*,*">
+							<Button Grid.Column="1" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+									Command="{Binding SwitchToPage}" CommandParameter="0">
+								<TextBlock>Done</TextBlock>
+							</Button>
+						</Grid>
+					</StackPanel>
+				</Panel>
+		</Carousel.Items>
+		
+	</Carousel>
+</Window>

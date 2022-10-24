@@ -10,6 +10,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UT4UU.Installer.CLI", "CLI\
 		{DF400685-80B0-4D79-A73B-D9B9BAA8EFC9} = {DF400685-80B0-4D79-A73B-D9B9BAA8EFC9}
 	EndProjectSection
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UT4UU.Installer.GUI", "GUI\UT4UU.Installer.GUI.csproj", "{8F440CAF-1088-4EB8-BA8F-2F63D0B74965}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -44,6 +46,18 @@ Global
 		{D78C46CC-27E3-440D-B613-51D3B11781FA}.Release|x64.Build.0 = Release|Any CPU
 		{D78C46CC-27E3-440D-B613-51D3B11781FA}.Release|x86.ActiveCfg = Release|Any CPU
 		{D78C46CC-27E3-440D-B613-51D3B11781FA}.Release|x86.Build.0 = Release|Any CPU
+		{8F440CAF-1088-4EB8-BA8F-2F63D0B74965}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8F440CAF-1088-4EB8-BA8F-2F63D0B74965}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8F440CAF-1088-4EB8-BA8F-2F63D0B74965}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{8F440CAF-1088-4EB8-BA8F-2F63D0B74965}.Debug|x64.Build.0 = Debug|Any CPU
+		{8F440CAF-1088-4EB8-BA8F-2F63D0B74965}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{8F440CAF-1088-4EB8-BA8F-2F63D0B74965}.Debug|x86.Build.0 = Debug|Any CPU
+		{8F440CAF-1088-4EB8-BA8F-2F63D0B74965}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8F440CAF-1088-4EB8-BA8F-2F63D0B74965}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8F440CAF-1088-4EB8-BA8F-2F63D0B74965}.Release|x64.ActiveCfg = Release|Any CPU
+		{8F440CAF-1088-4EB8-BA8F-2F63D0B74965}.Release|x64.Build.0 = Release|Any CPU
+		{8F440CAF-1088-4EB8-BA8F-2F63D0B74965}.Release|x86.ActiveCfg = Release|Any CPU
+		{8F440CAF-1088-4EB8-BA8F-2F63D0B74965}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
