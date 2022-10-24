@@ -49,7 +49,7 @@ namespace UT4UU.Installer.Common
 
 		public TaskCreateDesktopShortcut(string pointsTo, string arguments, string name, string description) :
 			base(
-				$"Create desktop shortcut '{name}' pointing at '{pointsTo}' with arguments '{arguments}'",
+				$"Create desktop shortcut '{name}'\npointing at '{pointsTo}'\nwith arguments '{arguments}'",
 				$"Delete desktop shortcut '{name}'"
 			)
 		{

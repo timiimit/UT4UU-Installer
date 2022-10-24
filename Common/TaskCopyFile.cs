@@ -11,7 +11,7 @@ namespace UT4UU.Installer.Common
 		private string from;
 		private string to;
 
-		public TaskCopyFile(string from, string to) : base($"Copy '{from}' to '{to}'", $"Delete '{to}'")
+		public TaskCopyFile(string from, string to) : base($"Copy '{Path.GetFileName(from)}' to '{Path.GetDirectoryName(to)}'", $"Delete '{to}'")
 		{
 			this.from = from;
 			this.to = to;

@@ -13,7 +13,7 @@ namespace UT4UU.Installer.Common
 
 		public TaskCreateSymbolicLink(string path, string pointsTo) :
 			base(
-				$"Create symbolic link at '{path}' pointing at '{pointsTo}'",
+				$"Create symbolic link '{path}' pointing at '{pointsTo}'",
 				$"Delete symbolic link '{path}'"
 			)
 		{
