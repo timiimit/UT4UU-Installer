@@ -337,6 +337,12 @@ namespace UT4UU.Installer.GUI.ViewModels
 				);
 				if (isUTDir)
 				{
+					// before we can initiate installation we have to create installinfo file
+					// we dont have to worry about cleaning it up
+					// it can just stay here
+					installOptions.Save(Helper.GetInstallInfoFile(installOptions.SourceLocation));
+
+					// begin to install
 					operation = new OperationInstall(installOptions);
 					operation.Do();
 				}
