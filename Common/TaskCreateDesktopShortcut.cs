@@ -1,4 +1,5 @@
-﻿using System;
+﻿using IWshRuntimeLibrary;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection.Metadata;
@@ -63,31 +64,15 @@ namespace UT4UU.Installer.Common
 		{
 			if (Environment.OSVersion.Platform == PlatformID.Win32NT)
 			{
-				// create shortcut file manually
-				File.WriteAllBytes(FullPath, new byte[0]);
+				WshShell shell = new();
 
-				// modify the shortcut file
-				var shell = new Shell32.Shell();
-				var folder = shell.NameSpace(DesktopDirectory);
-				var item = folder.Items().Item(Filename);
-				var shortcut = (Shell32.ShellLinkObject)item.GetLink;
-
-				shortcut.Path = pointsTo;
-				shortcut.Description = description;
-				shortcut.Arguments = arguments;
-				shortcut.SetIconLocation(pointsTo, 0);
+				IWshShortcut shortcut = (IWshShortcut)shell.CreateShortcut(FullPath);
+				shortcut.TargetPath = pointsTo;
 				shortcut.WorkingDirectory = Path.GetDirectoryName(pointsTo);
-
-#if false
-				StringBuilder sb = new StringBuilder();
-				sb.AppendLine($"Path: {shortcutPath}");
-				sb.AppendLine($"TargetPath: {shortcut.Path}");
-				sb.AppendLine($"Arguments: {shortcut.Arguments}");
-				sb.AppendLine($"IconLocation: {iconLocation}");
-				sb.AppendLine($"WorkingDirectory: {shortcut.WorkingDirectory}");
-				MessageBox.Show(sb.ToString());
-#endif
-
+				shortcut.Arguments = arguments;
+				shortcut.IconLocation = pointsTo + ", 0";
+				shortcut.Description = description;
+				shortcut.Hotkey = "Ctrl+Shift+U";
 				shortcut.Save();
 			}
 			else if (Environment.OSVersion.Platform == PlatformID.Unix)
@@ -103,11 +88,11 @@ Icon={Filename}
 Terminal=false
 Categories=Games;Entertainment;";
 
-				File.WriteAllText(FullPath, content);
+				System.IO.File.WriteAllText(FullPath, content);
 			}
 			else
 			{
-				File.WriteAllText(FullPath,
+				System.IO.File.WriteAllText(FullPath,
 					"Hi! I'm sorry, I wasn't sure how to make a shortcut for your system and frankly," +
 					"I'm not even sure why you would need this tool on your machine, so I just made this file instead :)");
 			}
@@ -115,7 +100,7 @@ Categories=Games;Entertainment;";
 
 		public override void Undo()
 		{
-			File.Delete(FullPath);
+			System.IO.File.Delete(FullPath);
 		}
 
 		public override void FinishDo()
