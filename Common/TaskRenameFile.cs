@@ -12,7 +12,7 @@ namespace UT4UU.Installer.Common
 		private string toFullpath;
 
 		public TaskRenameFile(string fromFullpath, string toFilename) : base(
-			$"Rename '{Path.GetFileName(fromFullpath)}' to '{toFilename}'",
+			$"Rename '{fromFullpath}' to '{toFilename}'",
 			$"Rename '{Path.Combine(Path.GetDirectoryName(fromFullpath) ?? string.Empty, toFilename)}' to '{Path.GetFileName(fromFullpath)}'")
 		{
 			this.fromFullpath = fromFullpath;

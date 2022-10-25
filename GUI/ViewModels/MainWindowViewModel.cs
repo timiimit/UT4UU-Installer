@@ -125,7 +125,35 @@ namespace UT4UU.Installer.GUI.ViewModels
 			{
 				if (!IsValidInstallLocation)
 					return "-";
-				return installOptions.PlatformTarget.ToString() + ", " + installOptions.BuildConfiguration.ToString();
+
+				// create a user-friendly description
+				string ret = string.Empty;
+				switch (installOptions.PlatformTarget)
+				{
+					case PlatformTarget.Win64:
+						ret += "Windows";
+						break;
+					default:
+						ret += installOptions.PlatformTarget.ToString();
+						break;
+				}
+				ret += " ";
+				switch (installOptions.BuildConfiguration)
+				{
+					case BuildConfiguration.Shipping:
+						ret += "Game";
+						break;
+					case BuildConfiguration.ShippingServer:
+						ret += "Server";
+						break;
+					case BuildConfiguration.DevelopmentEditor:
+						ret += "Editor";
+						break;
+					default:
+						ret += installOptions.BuildConfiguration.ToString();
+						break;
+				}
+				return ret;
 			}
 		}
 

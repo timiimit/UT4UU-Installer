@@ -91,7 +91,8 @@ namespace UT4UU.Installer.Common
 						break;
 				}
 
-				Thread.Sleep(1000);
+				// make it so that progress actually means something lol
+				Thread.Sleep(100);
 			}
 
 			for (int i = 0; i < touchedTasks.Count; i++)
@@ -102,9 +103,9 @@ namespace UT4UU.Installer.Common
 					tasks[touchedTasks[i]].FinishUndo();
 			}
 
-			string whatHappened = isDoing == targetDo ? "Completed" : "Aborted";
+			string whatHappened = isDoing == targetDo ? "Successfully completed" : "Aborted";
 			string taskDescripion = targetDo ? DescriptionDo : DescriptionUndo;
-			Options.Logger?.Invoke($"{whatHappened} Task: {taskDescripion}", taskIndex, TaskCount);
+			Options.Logger?.Invoke($"{whatHappened} action: {taskDescripion}", taskIndex, TaskCount);
 		}
 
 		public override void Do()
