@@ -25,6 +25,7 @@ namespace UT4UU.Installer.GUI.ViewModels
 		private string errorMessage;
 		private OperationInstallation? operation;
 		private double progress;
+		private bool canExit;
 
 		private bool cacheIsValidInstallLocation;
 		private string? cacheUT4UUVersionText;
@@ -191,9 +192,10 @@ namespace UT4UU.Installer.GUI.ViewModels
 			get => logMessages;
 		}
 
-		public bool IsProgressTextShown
+		public bool CanExit
 		{
-			get => true;
+			get => canExit;
+			set => this.RaiseAndSetIfChanged(ref canExit, value);
 		}
 
 		public void SwitchToPage(string index)
@@ -215,6 +217,7 @@ namespace UT4UU.Installer.GUI.ViewModels
 			errorMessage = string.Empty;
 			byte[] buffer = new byte[1024 * 1024];
 			logMessages = new ObservableCollection<string>();
+			CanExit = true;
 
 			installOptions = new Options();
 			installOptions.UpgradeEngineModules = true;
@@ -276,6 +279,8 @@ namespace UT4UU.Installer.GUI.ViewModels
 				return;
 			}
 
+			CanExit = false;
+
 			if (Helper.IsUT4UUInstalled(installOptions.InstallLocation))
 			{
 				bool isHandlableUT4UUInstalled = Helper.IsExpectedUT4UUVersionInstalled(
@@ -296,9 +301,8 @@ namespace UT4UU.Installer.GUI.ViewModels
 					if (sourceVersion != null)
 						sourceVersion = "<Unknown>";
 
-					ErrorMessage = $"This installer can only uninstall UT4UU {sourceVersion}";
+					ErrorMessage = $"This installer can only uninstall version '{sourceVersion}' of UT4UU";
 					SelectedPageIndex = 0;
-					return;
 				}
 			}
 			else
@@ -317,11 +321,11 @@ namespace UT4UU.Installer.GUI.ViewModels
 				{
 					ErrorMessage = $"Tried to install into non-UT4 related directory";
 					SelectedPageIndex = 0;
-					return;
 				}
 			}
 
 			operation = null;
+			CanExit = true;
 		}
 	}
 }

@@ -512,11 +512,10 @@ namespace UT4UU.Installer.Common
 			if (!IsUT4UUInstalled(installLocation))
 				return false;
 
-			string commonSubpath = Path.Combine("UnrealTourament", "Plugins", "UT4UU", "Binaries");
+			string commonSubpath = Path.Combine("UnrealTournament", "Plugins", "UT4UU", "Binaries");
 
 			string installDir = Path.Combine(installLocation, commonSubpath);
 			string sourceDir = Path.Combine(sourceLocation, commonSubpath);
-
 
 			var enumOptions = new EnumerationOptions() { RecurseSubdirectories = true };
 			var allFilesEnumeration = Directory.EnumerateFiles(sourceDir, "*.dll", enumOptions)
