@@ -42,12 +42,34 @@ namespace UT4UU.Installer.Common
 			if (options.CreateShortcut)
 			{
 				string exeName = Helper.GetGameExecutableName(options.PlatformTarget, options.BuildConfiguration);
-				tasks.Add(new TaskCreateDesktopShortcut(
-					Path.Combine(dstEngine, exeName),
-					"UnrealTournament -epicapp=UnrealTournamentDev -epicenv=Prod -EpicPortal",
-					"Unreal Tournament 4 UU",
-					"Run Unreal Tournament 4 as if it was ran from Epic Games Launcher"
-				) { CanFail = true });
+
+				// defaults
+				string name = "Unreal Tournament 4 UU";
+				string arguments = "UnrealTournament";
+				string description = "Run Unreal Tournament 4";
+
+				// specialized per build configuration
+				switch (options.BuildConfiguration)
+				{
+					case BuildConfiguration.Shipping: // standard game arguments
+						name = "Unreal Tournament 4 UU";
+						arguments = "UnrealTournament -epicapp=UnrealTournamentDev -epicenv=Prod -EpicPortal";
+						description = "Run Unreal Tournament 4 as if it was ran from Epic Games Launcher";
+						break;
+
+					case BuildConfiguration.ShippingServer: // standard hub arguments
+						name = "Unreal Tournament 4 UU Hub";
+						arguments = "UnrealTournament UT-Entry?Game=Lobby -Log";
+						description = "Run Unreal Tournament 4 Hub";
+						break;
+
+					case BuildConfiguration.DevelopmentEditor:
+						name = "Unreal Tournament 4 UU Editor";
+						break;
+				}
+
+				string fullpath = Path.Combine(dstEngine, exeName);
+				tasks.Add(new TaskCreateDesktopShortcut(fullpath, arguments,name,description) { CanFail = true });
 			}
 
 			AddCopyTask(srcPluginRoot, dstPluginRoot, "InstallInfo.bin");
