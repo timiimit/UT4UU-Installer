@@ -487,7 +487,10 @@ namespace UT4UU.Installer.Common
 
 		public static string? GetUT4UUInstalledVersionName(string installLocation)
 		{
-			// search uplugin for version name
+			// search uplugin for version name.
+			// this may not be the actual name of the version as user may have changed it.
+			// but who cares, then it's their fault that we cannot find the real version.
+
 			string uplugin = Path.Combine(installLocation, "UnrealTournament", "Plugins", "UT4UU", "UT4UU.uplugin");
 			if (!File.Exists(uplugin))
 				return null;

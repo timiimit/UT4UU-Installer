@@ -21,7 +21,7 @@ namespace UT4UU.Installer.GUI.ViewModels
 	{
 		private Options installOptions;
 		private int selectedPageIndex;
-		private ObservableCollection<string> logMessages;
+		private ObservableCollection<LogMessage> logMessages;
 		private string errorMessage;
 		private OperationInstallation? operation;
 		private double progress;
@@ -187,7 +187,7 @@ namespace UT4UU.Installer.GUI.ViewModels
 			}
 		}
 
-		public ObservableCollection<string> LogMessages
+		public ObservableCollection<LogMessage> LogMessages
 		{
 			get => logMessages;
 		}
@@ -216,7 +216,7 @@ namespace UT4UU.Installer.GUI.ViewModels
 		{
 			errorMessage = string.Empty;
 			byte[] buffer = new byte[1024 * 1024];
-			logMessages = new ObservableCollection<string>();
+			logMessages = new ObservableCollection<LogMessage>();
 			CanExit = true;
 
 			installOptions = new Options();
@@ -225,7 +225,26 @@ namespace UT4UU.Installer.GUI.ViewModels
 			installOptions.Logger = (string message, int taskIndex, int taskCount) =>
 			{
 				progress = taskIndex / (double)taskCount;
-				logMessages.Add(message);
+
+				// poor man's error message detection
+				string messageLower = message.ToLower();
+				bool isError =
+					messageLower.Contains("fail") ||
+					messageLower.Contains("warning") ||
+					messageLower.Contains("error") ||
+					messageLower.Contains("abort") ||
+					messageLower.Contains("cannot") ||
+					messageLower.Contains("can't") ||
+					messageLower.Contains("could not");
+
+				if (isError)
+				{
+					logMessages.Add(new LogMessageError(message));
+				}
+				else
+				{
+					logMessages.Add(new LogMessageInfo(message));
+				}
 
 				this.RaisePropertyChanged("Progress");
 				this.RaisePropertyChanged("LogMessages");
@@ -246,6 +265,10 @@ namespace UT4UU.Installer.GUI.ViewModels
 
 		private void SetInstallLocation(string location)
 		{
+			// clear any error message
+			ErrorMessage = string.Empty;
+
+			// change install location
 			installOptions.InstallLocation = location;
 			PlatformTarget platform = PlatformTarget.Unknown;
 			BuildConfiguration config = BuildConfiguration.Unknown;
@@ -287,7 +310,7 @@ namespace UT4UU.Installer.GUI.ViewModels
 					installOptions.InstallLocation,
 					installOptions.SourceLocation
 				);
-				if (installOptions.IsDryRun || isHandlableUT4UUInstalled)
+				if (isHandlableUT4UUInstalled)
 				{
 					operation = new OperationUninstall(installOptions);
 					operation.Do();
@@ -296,9 +319,9 @@ namespace UT4UU.Installer.GUI.ViewModels
 				{
 					string? installedVersion = Helper.GetUT4UUInstalledVersionName(installOptions.InstallLocation);
 					string? sourceVersion = Helper.GetUT4UUInstalledVersionName(installOptions.SourceLocation);
-					if (installedVersion != null)
+					if (installedVersion == null)
 						installedVersion = "<Unknown>";
-					if (sourceVersion != null)
+					if (sourceVersion == null)
 						sourceVersion = "<Unknown>";
 
 					ErrorMessage = $"This installer can only uninstall version '{sourceVersion}' of UT4UU";
@@ -312,7 +335,7 @@ namespace UT4UU.Installer.GUI.ViewModels
 					installOptions.PlatformTarget,
 					installOptions.BuildConfiguration
 				);
-				if (installOptions.IsDryRun || isUTDir)
+				if (isUTDir)
 				{
 					operation = new OperationInstall(installOptions);
 					operation.Do();

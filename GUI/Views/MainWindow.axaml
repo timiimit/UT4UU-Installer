@@ -1,6 +1,7 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="using:UT4UU.Installer.GUI.ViewModels"
+        xmlns:v="using:UT4UU.Installer.GUI.Views"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 		xmlns:sys="clr-namespace:System;assembly=mscorlib"
@@ -21,114 +22,118 @@
     </Design.DataContext>
 
 
-	<Carousel Margin="100,50,100,50" SelectedIndex="{Binding SelectedPageIndex, Mode=OneWay}">
-		<Carousel.Items>
-			<Grid RowDefinitions="Auto,1*,Auto,Auto">
-				<Grid Grid.Row="0">
-					<TextBlock Grid.Row="0" FontSize="48" HorizontalAlignment="Center" VerticalAlignment="Center">
-						UT4UU Installer
-					</TextBlock>
-				</Grid>
+	<Grid RowDefinitions="Auto,1*" Margin="100,50,100,50">
+		<TextBlock Grid.Row="0" FontSize="48" HorizontalAlignment="Center" VerticalAlignment="Center">
+			UT4UU Installer
+		</TextBlock>
+		<Carousel Grid.Row="1" SelectedIndex="{Binding SelectedPageIndex, Mode=OneWay}">
+			<Carousel.Items>
+				<Grid RowDefinitions="1*,Auto,Auto">
 
-				<Grid Grid.Row="1">
-					<StackPanel VerticalAlignment="Center">
-						<TextBlock Grid.Row="0" Margin="10" TextWrapping="Wrap" xml:space="default">
-							Please enter the location where game, server or editor was installed. By default, all new features that UT4UU provides will be installed. Feel free to customize your installation.
-						</TextBlock>
-						<TextBlock Grid.Row="0" Margin="10" TextWrapping="Wrap" xml:space="default">
-							To Uninstall, enter the location where UT4UU was previously installed.
-						</TextBlock>
-						<Grid ColumnDefinitions="1*,Auto">
-							<TextBox Grid.Column="0" Margin="10" Watermark="{Binding InstallLocationWatermark}" Text="{Binding InstallLocation, Mode=TwoWay}" />
-							<Button Grid.Column="1" Click="BrowseForInstallDirectory">
-								<TextBlock Text="Browse"/>
-							</Button>
-						</Grid>
-						<Grid ColumnDefinitions="1*,3*,1*,3*,1*">
-							<Grid.Styles>
-								<Style Selector="TextBlock">
-									<Setter Property="Margin" Value="5" />
-									<Setter Property="FontSize" Value="10" />
-								</Style>
-							</Grid.Styles>
+					<Grid Grid.Row="0">
+						<StackPanel VerticalAlignment="Center">
+							<TextBlock Grid.Row="0" Margin="10" TextWrapping="Wrap" xml:space="default">
+								Please enter the location where game, server or editor was installed. By default, all new features that UT4UU provides will be installed. Feel free to customize your installation.
+							</TextBlock>
+							<TextBlock Grid.Row="0" Margin="10" TextWrapping="Wrap" xml:space="default">
+								To Uninstall, enter the location where UT4UU was previously installed.
+							</TextBlock>
+							<Grid ColumnDefinitions="1*,Auto">
+								<TextBox Grid.Column="0" Margin="10" Watermark="{Binding InstallLocationWatermark}" Text="{Binding InstallLocation, Mode=TwoWay}" />
+								<Button Grid.Column="1" Click="BrowseForInstallDirectory">
+									<TextBlock Text="Browse"/>
+								</Button>
+							</Grid>
+							<Grid ColumnDefinitions="1*,3*,1*,3*,1*">
+								<Grid.Styles>
+									<Style Selector="TextBlock">
+										<Setter Property="Margin" Value="5" />
+										<Setter Property="FontSize" Value="10" />
+									</Style>
+								</Grid.Styles>
 
-							<StackPanel Grid.Column="1" Orientation="Horizontal">
-								<TextBlock Text="Build Type:"/>
-								<TextBlock Text="{Binding BuildTypeText}"/>
-							</StackPanel>
-							<StackPanel Grid.Column="3" Orientation="Horizontal">
-								<TextBlock Text="UT4UU Version:"/>
-								<TextBlock Text="{Binding UT4UUVersionText}" Foreground="{Binding UT4UUVersionTextColor}"/>
-							</StackPanel>
-						</Grid>
-					</StackPanel>
-				</Grid>
-
-				<Grid Grid.Row="2">
-					<TextBlock Margin="10" HorizontalAlignment="Center" Text="{Binding ErrorMessage}" IsVisible="{Binding IsErrorMessageVisible}" Foreground="Red" />
-				</Grid>
-
-				<Grid Grid.Row="3" ColumnDefinitions="1*,2*,2*,2*,1*">
-					<Button Grid.Column="1" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
-							Click="CloseInstaller" IsEnabled="{Binding CanExit}">
-						<TextBlock Text="Exit"/>
-					</Button>
-					<Button Grid.Column="2" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
-							Command="{Binding SwitchToPage}" CommandParameter="1"
-							IsEnabled="{Binding CanCustomizeAction}">
-						<TextBlock Text="Customize"/>
-					</Button>
-					<Button Grid.Column="3" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
-							Command="{Binding SwitchToPage}" CommandParameter="2"
-							IsEnabled="{Binding IsValidInstallLocation}">
-						<TextBlock Text="{Binding ActionButtonText}"/>
-					</Button>
-				</Grid>
-			</Grid>
-			<Panel HorizontalAlignment="Center" VerticalAlignment="Center">
-				<StackPanel Spacing="20">
-					<CheckBox IsChecked="{Binding IsDryRun}" ToolTip.Tip="Useful to just see what will happen during (un)installation">
-						<TextBlock>Only perform a simulation of (un)installation</TextBlock>
-					</CheckBox>
-					<CheckBox IsChecked="{Binding UpgradeEngineModules}" ToolTip.Tip="Upgrades the following engine modules: HTTP, SSL, HttpNetworkReplayStreaming, XMPP">
-						<TextBlock TextWrapping="Wrap">Fix all social features that got broken over the years</TextBlock>
-					</CheckBox>
-					<CheckBox IsChecked="{Binding CreateDesktopShortcut}">
-						<TextBlock TextWrapping="Wrap">Create desktop shortcut</TextBlock>
-					</CheckBox>
-					<Grid ColumnDefinitions="Auto,1*">
-						<TextBlock Margin="10,0" VerticalAlignment="Center">Replacement suffix: </TextBlock>
-						<TextBox Grid.Column="1" Text="{Binding ReplacementSuffix, Mode=TwoWay}">
-							<ToolTip.Tip>
-								Any original file that is to be replaced during installation, will instead be renamed such that this suffix will be appended to the end of the filename
-							</ToolTip.Tip>
-						</TextBox>
+								<StackPanel Grid.Column="1" Orientation="Horizontal">
+									<TextBlock Text="Build Type:"/>
+									<TextBlock Text="{Binding BuildTypeText}"/>
+								</StackPanel>
+								<StackPanel Grid.Column="3" Orientation="Horizontal">
+									<TextBlock Text="UT4UU Version:"/>
+									<TextBlock Text="{Binding UT4UUVersionText}" Foreground="{Binding UT4UUVersionTextColor}"/>
+								</StackPanel>
+							</Grid>
+						</StackPanel>
 					</Grid>
-					<Grid ColumnDefinitions="*,*,*">
+
+					<Grid Grid.Row="1">
+						<TextBlock Margin="10" HorizontalAlignment="Center" Text="{Binding ErrorMessage}" IsVisible="{Binding IsErrorMessageVisible}" Foreground="Red" />
+					</Grid>
+
+					<Grid Grid.Row="2" ColumnDefinitions="1*,2*,2*,2*,1*">
 						<Button Grid.Column="1" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
-								Command="{Binding SwitchToPage}" CommandParameter="0">
-							<TextBlock>Done</TextBlock>
+								Click="CloseInstaller" IsEnabled="{Binding CanExit}">
+							<TextBlock Text="Exit"/>
+						</Button>
+						<Button Grid.Column="2" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+								Command="{Binding SwitchToPage}" CommandParameter="1"
+								IsEnabled="{Binding CanCustomizeAction}">
+							<TextBlock Text="Customize"/>
+						</Button>
+						<Button Grid.Column="3" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+								Command="{Binding SwitchToPage}" CommandParameter="2"
+								IsEnabled="{Binding IsValidInstallLocation}">
+							<TextBlock Text="{Binding ActionButtonText}"/>
 						</Button>
 					</Grid>
-				</StackPanel>
-			</Panel>
-			<Panel>
-				<Grid RowDefinitions="Auto,1*,Auto">
-					<ProgressBar Margin="10" Grid.Row="0" Minimum="0.0" Maximum="1.0" Value="{Binding Progress}"/>
-					<ListBox Margin="10" Grid.Row="1" Items="{Binding LogMessages, Mode=OneWay}">
-						<ListBox.ItemTemplate>
-							<DataTemplate>
-								<TextBlock VerticalAlignment="Center" Text="{Binding .}" FontSize="8" />
-							</DataTemplate>
-						</ListBox.ItemTemplate>
-					</ListBox>
-					<Button Margin="20,10" Grid.Row="2" HorizontalAlignment="Right"
-							Click="CloseInstaller" IsEnabled="{Binding CanExit}">
-						<TextBlock Text="Finish" />
-					</Button>
 				</Grid>
-			</Panel>
-		</Carousel.Items>
-		
-	</Carousel>
+				<Panel HorizontalAlignment="Center" VerticalAlignment="Center">
+					<StackPanel Spacing="20">
+						<CheckBox IsChecked="{Binding IsDryRun}" ToolTip.Tip="Useful to just see what will happen during (un)installation">
+							<TextBlock>Only perform a simulation of (un)installation</TextBlock>
+						</CheckBox>
+						<CheckBox IsChecked="{Binding UpgradeEngineModules}" ToolTip.Tip="Upgrades the following engine modules: HTTP, SSL, HttpNetworkReplayStreaming, XMPP">
+							<TextBlock TextWrapping="Wrap">Fix all social features that got broken over the years</TextBlock>
+						</CheckBox>
+						<CheckBox IsChecked="{Binding CreateDesktopShortcut}">
+							<TextBlock TextWrapping="Wrap">Create desktop shortcut</TextBlock>
+						</CheckBox>
+						<Grid ColumnDefinitions="Auto,1*">
+							<TextBlock Margin="10,0" VerticalAlignment="Center">Replacement suffix: </TextBlock>
+							<TextBox Grid.Column="1" Text="{Binding ReplacementSuffix, Mode=TwoWay}">
+								<ToolTip.Tip>
+									Any original file that is to be replaced during installation, will instead be renamed such that this suffix will be appended to the end of the filename
+								</ToolTip.Tip>
+							</TextBox>
+						</Grid>
+						<Grid ColumnDefinitions="*,*,*">
+							<Button Grid.Column="1" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+									Command="{Binding SwitchToPage}" CommandParameter="0">
+								<TextBlock>Done</TextBlock>
+							</Button>
+						</Grid>
+					</StackPanel>
+				</Panel>
+				<Panel>
+					<Grid RowDefinitions="Auto,1*,Auto">
+						<ProgressBar Margin="10" Grid.Row="0" Minimum="0.0" Maximum="1.0" Value="{Binding Progress}"/>
+						<v:ListBoxScrollToEnd Margin="10" Grid.Row="1" Items="{Binding LogMessages, Mode=OneWay}">
+							<ListBox.DataTemplates>
+								<DataTemplate DataType="{x:Type vm:LogMessageInfo}">
+									<TextBlock VerticalAlignment="Center" Text="{Binding Text}" FontSize="8" />
+								</DataTemplate>
+								<DataTemplate DataType="{x:Type vm:LogMessageError}">
+									<TextBlock VerticalAlignment="Center" Text="{Binding Text}" FontSize="8" Foreground="Red" />
+								</DataTemplate>
+							</ListBox.DataTemplates>
+							<ListBox.ItemTemplate>
+							</ListBox.ItemTemplate>
+						</v:ListBoxScrollToEnd>
+						<Button Margin="20,10" Grid.Row="2" HorizontalAlignment="Right"
+								Click="CloseInstaller" IsEnabled="{Binding CanExit}">
+							<TextBlock Text="Finish" />
+						</Button>
+					</Grid>
+				</Panel>
+			</Carousel.Items>
+		</Carousel>
+	</Grid>
 </Window>

@@ -29,4 +29,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Common\UT4UU.Installer.Common.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Models\" />
+  </ItemGroup>
 </Project>
