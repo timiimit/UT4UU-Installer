@@ -23,8 +23,8 @@ namespace UT4UU.Installer.GUI.Views
 			{
 				if (Scroll is ScrollViewer scroll)
 				{
-					scroll.HorizontalScrollBarVisibility = Avalonia.Controls.Primitives.ScrollBarVisibility.Auto;
-					scroll.VerticalScrollBarVisibility = Avalonia.Controls.Primitives.ScrollBarVisibility.Visible;
+					scroll.HorizontalScrollBarVisibility = ScrollBarVisibility.Visible;
+					scroll.VerticalScrollBarVisibility = ScrollBarVisibility.Visible;
 				}
 
 				double left = Scroll.Viewport.Height + Scroll.Offset.Y;
