@@ -215,7 +215,7 @@ OPTIONS:
 
 		static int Main(string[] args)
 		{
-			int result = 0;
+			int result;
 			if (args.Length > 0)
 			{
 				Options options = new Options();
@@ -228,10 +228,6 @@ OPTIONS:
 				{
 					if (command == "install")
 					{
-						// create install info file which will be copied to installed plugin directory
-						if (!options.IsDryRun)
-							options.Save(Helper.GetInstallInfoFile(options.SourceLocation));
-
 						OperationInstall op = new OperationInstall(options);
 						op.Do();
 					}
