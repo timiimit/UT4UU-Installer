@@ -13,10 +13,16 @@ namespace UT4UU.Installer.Common
 			string srcEngine = Path.Combine(options.SourceLocation, "Engine", "Binaries", options.PlatformTarget.ToString());
 			string srcPluginRoot = Path.Combine(options.SourceLocation, "UnrealTournament", "Plugins", "UT4UU");
 			string srcPlugin = Path.Combine(srcPluginRoot, "Binaries", options.PlatformTarget.ToString());
+			string srcContent = Path.Combine(options.SourceLocation, "UnrealTournament", "Content");
+			string srcMovies = Path.Combine(srcContent, "Movies");
+			string srcSplash = Path.Combine(srcContent, "Splash");
 
 			string dstEngine = Path.Combine(options.InstallLocation, "Engine", "Binaries", options.PlatformTarget.ToString());
 			string dstPluginRoot = Path.Combine(options.InstallLocation, "UnrealTournament", "Plugins", "UT4UU");
 			string dstPlugin = Path.Combine(dstPluginRoot, "Binaries", options.PlatformTarget.ToString());
+			string dstContent = Path.Combine(options.InstallLocation, "UnrealTournament", "Content");
+			string dstMovies = Path.Combine(dstContent, "Movies");
+			string dstSplash = Path.Combine(dstContent, "Splash");
 
 			tasks = new List<Task>();
 
@@ -72,7 +78,58 @@ namespace UT4UU.Installer.Common
 				tasks.Add(new TaskCreateDesktopShortcut(fullpath, arguments,name,description) { CanFail = true });
 			}
 
-			AddCopyTask(srcPluginRoot, dstPluginRoot, "InstallInfo.bin");
+			if (options.RefreshingExperience && options.BuildConfiguration == BuildConfiguration.Shipping)
+			{
+				tasks.Add(new TaskRenameFile(
+					Path.Combine(dstMovies, "engine_startup.mp4"),
+					"engine_startup.mp4" + Options.ReplacementSuffix
+				));
+				tasks.Add(new TaskRenameFile(
+					Path.Combine(dstMovies, "intro_full.mp4"),
+					"engine_startup.mp4"
+				));
+				tasks.Add(new TaskRenameFile(
+					Path.Combine(dstSplash, "Splash.bmp"),
+					"Splash.bmp" + options.ReplacementSuffix
+				));
+				AddCopyTask(srcSplash, dstSplash, "Splash.bmp");
+			}
+
+			if (options.TryToInstallInLocalGameServer && options.BuildConfiguration == BuildConfiguration.Shipping)
+			{
+				// TODO: heavy debugging needed
+				Options subOptions = options;
+				subOptions.TryToInstallInLocalGameServer = false;
+				subOptions.CreateShortcut = false;
+
+				if (options.PlatformTarget == PlatformTarget.Win64)
+					subOptions.InstallLocation = Path.Combine(options.InstallLocation, "WindowsServer");
+				else if (options.PlatformTarget == PlatformTarget.Linux)
+					subOptions.InstallLocation = Path.Combine(options.InstallLocation, "LinuxServer");
+
+				PlatformTarget pt = PlatformTarget.Unknown;
+				BuildConfiguration bc = BuildConfiguration.Unknown;
+				if (Helper.DetectInstallationType(subOptions.InstallLocation, ref pt, ref bc) && bc == BuildConfiguration.ShippingServer)
+				{
+					subOptions.PlatformTarget = pt;
+					subOptions.BuildConfiguration = BuildConfiguration.ShippingServer;
+					var subInstallation = new OperationInstallation(subOptions, true) { CanFail = true };
+					tasks.Add(subInstallation);
+
+					// don't think we can unwrap the sub installation due to this whole operation being optional.
+					// meaning, we don't want to abort installation if we fail to install into local server.
+
+					//subInstallation.DescriptionDo = "Install UT4UU into local game server";
+					//// we want to unwrap tasks out, because this way caller
+					//// can know the whole number of tasks.
+					//for (int i = 0; i < subInstallation.tasks.Count; i++)
+					//{
+					//	tasks.Add(subInstallation.tasks[i]);
+					//}
+				}
+			}
+
+			tasks.Add(new TaskCreateInstallInfoFile(options));
 		}
 
 		private string GetModuleName(string moduleName)
