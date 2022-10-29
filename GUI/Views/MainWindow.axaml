@@ -90,9 +90,9 @@
 									IsEnabled="{Binding CanCustomizeAction}">
 							<TextBlock TextWrapping="Wrap">Create desktop shortcut</TextBlock>
 						</CheckBox>
-						<CheckBox IsChecked="{Binding RefreshingExperience}" ToolTip.Tip="Change the startup movie and splash screen image."
+						<CheckBox IsChecked="{Binding RefreshingExperience}" ToolTip.Tip="Change the startup movie and splash screen image. This won't do anything if installed into editor or server."
 									IsEnabled="{Binding CanCustomizeAction}">
-							<TextBlock TextWrapping="Wrap">Refreshing experience</TextBlock>
+							<TextBlock TextWrapping="Wrap">Refreshing experience for the game</TextBlock>
 						</CheckBox>
 						<CheckBox IsChecked="{Binding UpgradeEngineModules}" ToolTip.Tip="Upgrades the following engine modules: HTTP, SSL, HttpNetworkReplayStreaming, XMPP"
 									IsEnabled="{Binding CanCustomizeAction}">
@@ -100,7 +100,9 @@
 						</CheckBox>
 						<Grid ColumnDefinitions="Auto,1*"
 								IsEnabled="{Binding CanCustomizeSuffix}">
-							<TextBlock Margin="10,0" VerticalAlignment="Center">Replacement suffix: </TextBlock>
+							<TextBlock Margin="10,0" VerticalAlignment="Center" IsEnabled="{Binding CanCustomizeAction}">
+								Replacement suffix: 
+							</TextBlock>
 							<TextBox Grid.Column="1" Text="{Binding ReplacementSuffix, Mode=TwoWay}">
 								<ToolTip.Tip>
 									Any original file that is to be replaced during installation, will instead be renamed such that this suffix will be appended to the end of the filename
@@ -128,19 +130,43 @@
 						<v:ListBoxScrollToEnd Margin="10" Grid.Row="1" Items="{Binding LogMessages, Mode=OneWay}">
 							<ListBox.DataTemplates>
 								<DataTemplate DataType="{x:Type vm:LogMessageInfo}">
-									<TextBlock VerticalAlignment="Center" Text="{Binding Text}" FontSize="8" />
+									<TextBlock VerticalAlignment="Center" Text="{Binding Text}" FontSize="10" />
 								</DataTemplate>
 								<DataTemplate DataType="{x:Type vm:LogMessageError}">
-									<TextBlock VerticalAlignment="Center" Text="{Binding Text}" FontSize="8" Foreground="Red" />
+									<TextBlock VerticalAlignment="Center" Text="{Binding Text}" FontSize="10" Foreground="Red" />
 								</DataTemplate>
 							</ListBox.DataTemplates>
 							<ListBox.ItemTemplate>
 							</ListBox.ItemTemplate>
 						</v:ListBoxScrollToEnd>
 						<Button Margin="20,10" Grid.Row="2" HorizontalAlignment="Right"
-								Click="CloseInstaller" IsEnabled="{Binding CanExit}">
-							<TextBlock Text="Finish" />
+								Command="{Binding SwitchToPage}" CommandParameter="3" IsEnabled="{Binding CanExit}">
+							<TextBlock Text="Next" />
 						</Button>
+					</Grid>
+				</Panel>
+				<Panel>
+					<Grid RowDefinitions="1*,Auto">
+						<StackPanel Grid.Row="0" Spacing="10" VerticalAlignment="Center">
+							<TextBlock FontSize="20" Text="{Binding AfterInstallTitle}" />
+							<TextBlock TextWrapping="Wrap" Text="{Binding AfterInstallParagraph1}" />
+							<TextBlock TextWrapping="Wrap" Text="{Binding AfterInstallParagraph2}" />
+							<TextBlock TextWrapping="Wrap" Text="{Binding AfterInstallParagraph3}" />
+						</StackPanel>
+						<Grid Grid.Row="1" ColumnDefinitions="1*,2*,2*,2*,1*">
+							<Button Grid.Column="1" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+									Command="{Binding RunProcess}" CommandParameter="https://discord.gg/2DaCWkK">
+								<TextBlock Text="Join Discord Server"/>
+							</Button>
+							<Button Grid.Column="2" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+									Command="{Binding OpenFile}" CommandParameter="LastInstallation.log">
+								<TextBlock Text="Open Log File"/>
+							</Button>
+							<Button Grid.Column="3" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+									Click="CloseInstaller" IsEnabled="{Binding CanExit}">
+								<TextBlock Text="Exit Installer"/>
+							</Button>
+						</Grid>
 					</Grid>
 				</Panel>
 			</Carousel.Items>

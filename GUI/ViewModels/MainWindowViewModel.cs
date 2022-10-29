@@ -13,6 +13,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Reflection.Metadata;
+using System.Runtime.InteropServices;
 using UT4UU.Installer.Common;
 
 namespace UT4UU.Installer.GUI.ViewModels
@@ -44,7 +45,7 @@ namespace UT4UU.Installer.GUI.ViewModels
 		{
 			get
 			{
-				if (Helper.IsUT4UUInstalled(installOptions.InstallLocation))
+				if (cacheUT4UUVersionText != null)
 					return "Uninstall";
 				return "Install";
 			}
@@ -224,6 +225,82 @@ namespace UT4UU.Installer.GUI.ViewModels
 			set => this.RaiseAndSetIfChanged(ref canExit, value);
 		}
 
+		private bool isInstallationSuccessful;
+
+		public string AfterInstallTitle
+		{
+			get
+			{
+				return $"{(cacheUT4UUVersionText == null ? "I" : "Uni")}nstallation {(isInstallationSuccessful ? "successful" : "failed")}!";
+			}
+		}
+
+		public string AfterInstallParagraph1
+		{
+			get
+			{
+				if (isInstallationSuccessful)
+				{
+					if (cacheUT4UUVersionText == null)
+					{
+						return $"If you are going to uninstall Unreal Tournament 4, please make sure to first uninstall UT4UU with this installer.";
+					}
+					else
+					{
+						return $"We are sad to see you leave. Unless... you are just updating.";
+					}
+				}
+				else
+				{
+					return $"Something went wrong while {(cacheUT4UUVersionText == null ? "" : "un")}installing.";
+				}
+			}
+		}
+
+		public string AfterInstallParagraph2
+		{
+			get
+			{
+				if (isInstallationSuccessful)
+				{
+					if (cacheUT4UUVersionText == null)
+					{
+						return $"If you don't do that, some files might remain on your machine without your knowledge after {BuildTypeText} uninstallation.";
+					}
+					else
+					{
+						return $"Either way, thank you for using UT4UU {cacheUT4UUVersionText}.";
+					}
+				}
+				else
+				{
+					return $"You may open log file which should contain information of what went wrong.";
+				}
+			}
+		}
+
+		public string AfterInstallParagraph3
+		{
+			get
+			{
+				if (isInstallationSuccessful)
+				{
+					if (cacheUT4UUVersionText == null)
+					{
+						return $"To uninstall, run this installer again and enter the location where UT4UU was previously installed.";
+					}
+					else
+					{
+						return $"Goodbye o/";
+					}
+				}
+				else
+				{
+					return $"If you cannot figure it out, feel free to ask for help in our discord server.";
+				}
+			}
+		}
+
 		public void SwitchToPage(string index)
 		{
 			SelectedPageIndex = int.Parse(index);
@@ -235,11 +312,61 @@ namespace UT4UU.Installer.GUI.ViewModels
 				}
 				, DispatcherPriority.Background);
 			}
+			else if (SelectedPageIndex == 3)
+			{
+				this.RaisePropertyChanged("AfterInstallTitle");
+				this.RaisePropertyChanged("AfterInstallParagraph1");
+				this.RaisePropertyChanged("AfterInstallParagraph2");
+				this.RaisePropertyChanged("AfterInstallParagraph3");
+			}
 		}
 
+		public static bool OpenFile(string filepath)
+		{
+			return RunProcess("file:///" + (System.IO.Path.IsPathRooted(filepath) ? filepath : System.IO.Path.Combine(Environment.CurrentDirectory, filepath)));
+		}
+
+		public static bool RunProcess(string uri)
+		{
+			Process? p;
+			try
+			{
+				p = Process.Start(uri);
+			}
+			catch (Exception ex)
+			{
+				Trace.WriteLine(ex);
+
+				if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+				{
+					uri = uri.Replace("&", "^&");
+					p = Process.Start(new ProcessStartInfo("cmd", $"/c \"start {uri}\"") { CreateNoWindow = true });
+				}
+				else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+				{
+					// untested
+					p = Process.Start("xdg-open", uri);
+				}
+				else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+				{
+					// untested
+					p = Process.Start("open", uri);
+				}
+				else
+				{
+					return false;
+				}
+			}
+
+			p?.Dispose();
+			return true;
+		}
+
+		private StreamWriter? logFileStream;
 
 		public MainWindowViewModel()
 		{
+			isInstallationSuccessful = false;
 			errorMessage = string.Empty;
 			byte[] buffer = new byte[1024 * 1024];
 			logMessages = new ObservableCollection<LogMessage>();
@@ -252,6 +379,7 @@ namespace UT4UU.Installer.GUI.ViewModels
 			installOptions.TryToInstallInLocalGameServer = true;
 			installOptions.Logger = (string message, int taskIndex, int taskCount) =>
 			{
+
 				progress = taskIndex / (double)taskCount;
 
 				// poor man's error message detection
@@ -268,10 +396,12 @@ namespace UT4UU.Installer.GUI.ViewModels
 				if (isError)
 				{
 					logMessages.Add(new LogMessageError(message));
+					logFileStream?.WriteLine($"[{DateTime.UtcNow}] Err: {message}");
 				}
 				else
 				{
 					logMessages.Add(new LogMessageInfo(message));
+					logFileStream?.WriteLine($"[{DateTime.UtcNow}] Log: {message}");
 				}
 
 				this.RaisePropertyChanged("Progress");
@@ -332,6 +462,8 @@ namespace UT4UU.Installer.GUI.ViewModels
 			}
 
 			CanExit = false;
+			logFileStream = new StreamWriter(new FileStream("LastInstallation.log", FileMode.Append, FileAccess.Write, FileShare.Read));
+			logFileStream.WriteLine("-------------------- START OF LOG --------------------");
 
 			if (Helper.IsUT4UUInstalled(installOptions.InstallLocation))
 			{
@@ -342,7 +474,15 @@ namespace UT4UU.Installer.GUI.ViewModels
 				if (isHandlableUT4UUInstalled)
 				{
 					operation = new OperationUninstall(installOptions);
-					operation.Do();
+					try
+					{
+						operation.Do();
+						isInstallationSuccessful = true;
+					}
+					catch
+					{
+						isInstallationSuccessful = false;
+					}
 				}
 				else
 				{
@@ -366,14 +506,17 @@ namespace UT4UU.Installer.GUI.ViewModels
 				);
 				if (isUTDir)
 				{
-					// before we can initiate installation we have to create installinfo file
-					// we dont have to worry about cleaning it up
-					// it can just stay here
-					installOptions.Save(Helper.GetInstallInfoFile(installOptions.SourceLocation));
-
 					// begin to install
 					operation = new OperationInstall(installOptions);
-					operation.Do();
+					try
+					{
+						operation.Do();
+						isInstallationSuccessful = true;
+					}
+					catch
+					{
+						isInstallationSuccessful = false;
+					}
 				}
 				else
 				{
@@ -381,6 +524,9 @@ namespace UT4UU.Installer.GUI.ViewModels
 					SelectedPageIndex = 0;
 				}
 			}
+
+			logFileStream.Dispose();
+			logFileStream = null;
 
 			operation = null;
 			CanExit = true;
