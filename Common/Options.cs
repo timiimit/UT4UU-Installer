@@ -44,7 +44,7 @@ namespace UT4UU.Installer.Common
 
 		public void Save(string filepath)
 		{
-			using (var w = new BinaryWriter(new FileStream(filepath, FileMode.CreateNew, FileAccess.Write, FileShare.Read)))
+			using (var w = new BinaryWriter(new FileStream(filepath, FileMode.Create, FileAccess.Write, FileShare.Read)))
 			{
 				w.Write(CreateShortcut);
 				w.Write(IsDryRun);
