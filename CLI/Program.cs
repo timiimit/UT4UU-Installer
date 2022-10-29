@@ -58,6 +58,12 @@ OPTIONS:
     -u or --upgrade-engine-modules    Upgrade engine's modules. This fixes friend list in the game.
                                       (default: {o.UpgradeEngineModules})
 
+    --install-local-server            Try to install in game's local server.
+                                      (default: {o.TryToInstallInLocalGameServer})
+
+    --refreshing-experience           Install new startup movie and a new splash screen image.
+                                      (default: {o.RefreshingExperience})
+
     -d or --dry-run                   Only logs what is supposed to be happening. Does not actually
                                       preform an installation. This is useful for debugging or just
                                       seeing what will happen at installation.
@@ -110,6 +116,10 @@ OPTIONS:
 					options.CreateShortcut = true;
 				else if (arg == "-l" || arg == "--symbolic-links")
 					options.CreateSymbolicLinks = true;
+				else if (arg == "--install-local-server")
+					options.TryToInstallInLocalGameServer = true;
+				else if (arg == "--refreshing-experience")
+					options.RefreshingExperience = true;
 				else if (arg == "-u" || arg == "--upgrade-engine-modules")
 					options.UpgradeEngineModules = true;
 				else if (arg == "-i" || arg == "--install-path")

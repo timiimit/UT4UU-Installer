@@ -12,6 +12,8 @@ namespace UT4UU.Installer.Common
 		public bool IsDryRun { get; set; }
 		public bool CreateSymbolicLinks { get; set; }
 		public bool UpgradeEngineModules { get; set; }
+		public bool RefreshingExperience { get; set; }
+		public bool TryToInstallInLocalGameServer { get; set; }
 		public string SourceLocation { get; set; }
 		public string InstallLocation { get; set; }
 		public string ReplacementSuffix { get; set; }
@@ -30,6 +32,8 @@ namespace UT4UU.Installer.Common
 #endif
 			CreateSymbolicLinks = false;
 			UpgradeEngineModules = false;
+			RefreshingExperience = false;
+			TryToInstallInLocalGameServer = false;
 			SourceLocation = string.Empty;
 			InstallLocation = string.Empty;
 			ReplacementSuffix = ".uu.bak";
@@ -46,6 +50,8 @@ namespace UT4UU.Installer.Common
 				w.Write(IsDryRun);
 				w.Write(CreateSymbolicLinks);
 				w.Write(UpgradeEngineModules);
+				w.Write(RefreshingExperience);
+				w.Write(TryToInstallInLocalGameServer);
 				w.Write(SourceLocation);
 				w.Write(InstallLocation);
 				w.Write(ReplacementSuffix);
@@ -63,6 +69,8 @@ namespace UT4UU.Installer.Common
 				o.IsDryRun = r.ReadBoolean();
 				o.CreateSymbolicLinks = r.ReadBoolean();
 				o.UpgradeEngineModules = r.ReadBoolean();
+				o.RefreshingExperience = r.ReadBoolean();
+				o.TryToInstallInLocalGameServer = r.ReadBoolean();
 				o.SourceLocation = r.ReadString();
 				o.InstallLocation = r.ReadString();
 				o.ReplacementSuffix = r.ReadString();

@@ -69,6 +69,11 @@ namespace UT4UU.Installer.GUI.ViewModels
 			get => cacheIsValidInstallLocation && cacheUT4UUVersionText == null;
 		}
 
+		public bool CanCustomizeSuffix
+		{
+			get => CanCustomizeAction && (RefreshingExperience || UpgradeEngineModules);
+		}
+
 		public bool IsDryRun
 		{
 			get => installOptions.IsDryRun;
@@ -85,6 +90,28 @@ namespace UT4UU.Installer.GUI.ViewModels
 			set
 			{
 				installOptions.UpgradeEngineModules = value;
+				this.RaisePropertyChanged();
+				this.RaisePropertyChanged("CanCustomizeSuffix");
+			}
+		}
+
+		public bool RefreshingExperience
+		{
+			get => installOptions.RefreshingExperience;
+			set
+			{
+				installOptions.RefreshingExperience = value;
+				this.RaisePropertyChanged();
+				this.RaisePropertyChanged("CanCustomizeSuffix");
+			}
+		}
+
+		public bool TryToInstallInLocalGameServer
+		{
+			get => installOptions.TryToInstallInLocalGameServer;
+			set
+			{
+				installOptions.TryToInstallInLocalGameServer = value;
 				this.RaisePropertyChanged();
 			}
 		}
@@ -108,7 +135,6 @@ namespace UT4UU.Installer.GUI.ViewModels
 				this.RaisePropertyChanged();
 			}
 		}
-
 
 		public int SelectedPageIndex
 		{
@@ -222,6 +248,8 @@ namespace UT4UU.Installer.GUI.ViewModels
 			installOptions = new Options();
 			installOptions.UpgradeEngineModules = true;
 			installOptions.CreateShortcut = true;
+			installOptions.RefreshingExperience = true;
+			installOptions.TryToInstallInLocalGameServer = true;
 			installOptions.Logger = (string message, int taskIndex, int taskCount) =>
 			{
 				progress = taskIndex / (double)taskCount;
@@ -288,6 +316,7 @@ namespace UT4UU.Installer.GUI.ViewModels
 			this.RaisePropertyChanged("InstallLocation");
 			this.RaisePropertyChanged("IsValidInstallLocation");
 			this.RaisePropertyChanged("CanCustomizeAction");
+			this.RaisePropertyChanged("CanCustomizeSuffix");
 			this.RaisePropertyChanged("ActionButtonText");
 			this.RaisePropertyChanged("BuildTypeText");
 			this.RaisePropertyChanged("UT4UUVersionText");
