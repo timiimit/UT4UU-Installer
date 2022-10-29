@@ -11,13 +11,32 @@ namespace UT4UU.Installer.Common
 		public Options Options { get; private set; }
 
 		public int TaskCount { get => tasks.Count; }
+		//private int outerTaskIndex;
+
+		//public int TaskCount
+		//{
+		//	get
+		//	{
+		//		int counter = 0;
+		//		for (int i = 0; i < tasks.Count; i++)
+		//		{
+		//			if (tasks[i] is Operation op)
+		//			{
+		//				counter += op.TaskCount;
+		//			}
+		//			counter++;
+		//		}
+		//		return counter;
+		//	}
+		//}
 
 
 		protected List<Task> tasks;
 		private bool doDirection;
 
-		public Operation(string descriptionDo, string descriptionUndo, Options options, bool direction) : base(descriptionDo, descriptionUndo)
+		public Operation(string descriptionDo, string descriptionUndo, /*int outerTaskIndex,*/ Options options, bool direction) : base(descriptionDo, descriptionUndo)
 		{
+			//this.outerTaskIndex = outerTaskIndex;
 			Options = options;
 			tasks = new List<Task>();
 			doDirection = direction;
@@ -35,34 +54,34 @@ namespace UT4UU.Installer.Common
 				else
 					Options.Logger?.Invoke(tasks[taskIndex].DescriptionUndo, taskIndex, TaskCount);
 
-				if (!Options.IsDryRun)
+				try
 				{
-					try
+					if (!Options.IsDryRun || tasks[taskIndex] is Operation)
 					{
 						if (isDoing)
 							tasks[taskIndex].Do();
 						else
 							tasks[taskIndex].Undo();
 					}
-					catch (Exception ex)
+				}
+				catch (Exception ex)
+				{
+					Options.Logger?.Invoke($"Task {taskIndex} failed: {ex.Message}", taskIndex, TaskCount);
+					if (isDoing == targetDo)
 					{
-						Options.Logger?.Invoke($"Task {taskIndex} failed: {ex.Message}", taskIndex, TaskCount);
-						if (isDoing == targetDo)
+						if (tasks[taskIndex].CanFail)
 						{
-							if (tasks[taskIndex].CanFail)
-							{
-								Options.Logger?.Invoke($"Continuing with tasks...", taskIndex, TaskCount);
-							}
-							else
-							{
-								Options.Logger?.Invoke($"Undoing tasks...", taskIndex, TaskCount);
-								isDoing = !targetDo;
-							}
+							Options.Logger?.Invoke($"Continuing with tasks...", taskIndex, TaskCount);
 						}
 						else
 						{
-							Options.Logger?.Invoke($"Ignoring exception, continuing to undo tasks...", taskIndex, TaskCount);
+							Options.Logger?.Invoke($"Undoing tasks...", taskIndex, TaskCount);
+							isDoing = !targetDo;
 						}
+					}
+					else
+					{
+						Options.Logger?.Invoke($"Ignoring exception, continuing to undo tasks...", taskIndex, TaskCount);
 					}
 				}
 
@@ -92,7 +111,11 @@ namespace UT4UU.Installer.Common
 				}
 
 				// make it so that progress actually means something lol
+#if DEBUG
 				Thread.Sleep(100);
+#else
+				Thread.Sleep(50);
+#endif
 			}
 
 			for (int i = 0; i < touchedTasks.Count; i++)
@@ -106,6 +129,12 @@ namespace UT4UU.Installer.Common
 			string whatHappened = isDoing == targetDo ? "Successfully completed" : "Aborted";
 			string taskDescripion = targetDo ? DescriptionDo : DescriptionUndo;
 			Options.Logger?.Invoke($"{whatHappened} action: {taskDescripion}", taskIndex, TaskCount);
+
+			if (isDoing != targetDo)
+			{
+				// we failed to do this task
+				throw new OperationCanceledException();
+			}
 		}
 
 		public override void Do()
@@ -120,12 +149,12 @@ namespace UT4UU.Installer.Common
 
 		public override void FinishDo()
 		{
-			throw new NotImplementedException();
+
 		}
 
 		public override void FinishUndo()
 		{
-			throw new NotImplementedException();
+
 		}
 	}
 }
