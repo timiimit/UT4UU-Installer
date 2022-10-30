@@ -19,7 +19,23 @@ namespace UT4UU.Installer.Common
 		public string ReplacementSuffix { get; set; }
 		public PlatformTarget PlatformTarget { get; set; }
 		public BuildConfiguration BuildConfiguration { get; set; }
-		public Action<string, int, int>? Logger { get; set; }
+
+		public class LogEventArgs
+		{
+			public string Message { get; set; }
+			public int TaskIndex { get; set; }
+			public int TaskCount { get; set; }
+			public int OperationDepth { get; set; }
+
+			public LogEventArgs(string message, int taskIndex, int taskCount, int operationDepth)
+			{
+				Message = message;
+				TaskIndex = taskIndex;
+				TaskCount = taskCount;
+				OperationDepth = operationDepth;
+			}
+		}
+		public Action<object?, LogEventArgs>? Logger { get; set; }
 
 
 		public Options()

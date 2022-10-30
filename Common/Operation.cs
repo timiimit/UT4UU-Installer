@@ -10,6 +10,8 @@ namespace UT4UU.Installer.Common
 	{
 		public Options Options { get; private set; }
 
+		private int operationDepth;
+		public int OperationDepth { get => operationDepth; }
 		public int TaskCount { get => tasks.Count; }
 		//private int outerTaskIndex;
 
@@ -34,25 +36,26 @@ namespace UT4UU.Installer.Common
 		protected List<Task> tasks;
 		private bool doDirection;
 
-		public Operation(string descriptionDo, string descriptionUndo, /*int outerTaskIndex,*/ Options options, bool direction) : base(descriptionDo, descriptionUndo)
+		public Operation(string descriptionDo, string descriptionUndo, int depth, /*int outerTaskIndex,*/ Options options, bool direction) : base(descriptionDo, descriptionUndo)
 		{
+			operationDepth = depth;
 			//this.outerTaskIndex = outerTaskIndex;
 			Options = options;
-			tasks = new List<Task>();
+			tasks = new();
 			doDirection = direction;
 		}
 
 		private void InternalDo(bool targetDo)
 		{
-			List<int> touchedTasks = new List<int>();
+			List<int> touchedTasks = new();
 			bool isDoing = targetDo;
 			int taskIndex = targetDo ? 0 : tasks.Count - 1;
 			while (true)
 			{
 				if (isDoing)
-					Options.Logger?.Invoke(tasks[taskIndex].DescriptionDo, taskIndex, TaskCount);
+					Options.Logger?.Invoke(this, new(tasks[taskIndex].DescriptionDo, taskIndex, TaskCount, OperationDepth));
 				else
-					Options.Logger?.Invoke(tasks[taskIndex].DescriptionUndo, taskIndex, TaskCount);
+					Options.Logger?.Invoke(this, new(tasks[taskIndex].DescriptionUndo, taskIndex, TaskCount, OperationDepth));
 
 				try
 				{
@@ -66,22 +69,22 @@ namespace UT4UU.Installer.Common
 				}
 				catch (Exception ex)
 				{
-					Options.Logger?.Invoke($"Task {taskIndex} failed: {ex.Message}", taskIndex, TaskCount);
+					Options.Logger?.Invoke(this, new($"Task {taskIndex} failed: {ex.Message}", taskIndex, TaskCount, OperationDepth));
 					if (isDoing == targetDo)
 					{
 						if (tasks[taskIndex].CanFail)
 						{
-							Options.Logger?.Invoke($"Continuing with tasks...", taskIndex, TaskCount);
+							Options.Logger?.Invoke(this, new($"Continuing with tasks...", taskIndex, TaskCount, OperationDepth));
 						}
 						else
 						{
-							Options.Logger?.Invoke($"Undoing tasks...", taskIndex, TaskCount);
+							Options.Logger?.Invoke(this, new($"Undoing tasks...", taskIndex, TaskCount, OperationDepth));
 							isDoing = !targetDo;
 						}
 					}
 					else
 					{
-						Options.Logger?.Invoke($"Ignoring exception, continuing to undo tasks...", taskIndex, TaskCount);
+						Options.Logger?.Invoke(this, new($"Ignoring exception, continuing to undo tasks...", taskIndex, TaskCount, OperationDepth));
 					}
 				}
 
@@ -128,7 +131,7 @@ namespace UT4UU.Installer.Common
 
 			string whatHappened = isDoing == targetDo ? "Successfully completed" : "Aborted";
 			string taskDescripion = targetDo ? DescriptionDo : DescriptionUndo;
-			Options.Logger?.Invoke($"{whatHappened} action: {taskDescripion}", taskIndex, TaskCount);
+			Options.Logger?.Invoke(this, new($"{whatHappened} action: {taskDescripion}", taskIndex, TaskCount, OperationDepth));
 
 			if (isDoing != targetDo)
 			{

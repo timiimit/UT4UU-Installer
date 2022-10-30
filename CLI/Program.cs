@@ -96,9 +96,9 @@ OPTIONS:
 		{
 			//options.InstallLocation = Helper.TryFindInstallationLocation() ?? string.Empty;
 			options.SourceLocation = Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly()?.Location) ?? Environment.CurrentDirectory, "Files");
-			options.Logger = (string message, int taskIndex, int taskCount) =>
+			options.Logger = (object? sender, Options.LogEventArgs e) =>
 			{
-				Console.WriteLine(message);
+				Console.WriteLine(e.Message);
 			};
 
 #if DEBUG
@@ -143,7 +143,7 @@ OPTIONS:
 			{
 				if (detectedInstallLocation == null)
 				{
-					options.Logger.Invoke("Failed to find install location. Please specify it manually.", 0, 0);
+					options.Logger.Invoke(null, new("Failed to find install location. Please specify it manually.", 0, 0, 0));
 					return 1;
 				}
 				options.InstallLocation = detectedInstallLocation;
@@ -162,12 +162,12 @@ OPTIONS:
 
 			if (options.PlatformTarget == PlatformTarget.Unknown && options.BuildConfiguration != BuildConfiguration.Unknown)
 			{
-				options.Logger.Invoke("PlatformTarget is unknown.", 0, 0);
+				options.Logger.Invoke(null, new("PlatformTarget is unknown.", 0, 0, 0));
 				return 1;
 			}
 			else if (options.PlatformTarget != PlatformTarget.Unknown && options.BuildConfiguration == BuildConfiguration.Unknown)
 			{
-				options.Logger.Invoke("BuildConfiguration is unknown.", 0, 0);
+				options.Logger.Invoke(null, new("BuildConfiguration is unknown.", 0, 0, 0));
 				return 1;
 			}
 			else if (options.PlatformTarget == PlatformTarget.Unknown && options.BuildConfiguration == BuildConfiguration.Unknown)
@@ -181,7 +181,7 @@ OPTIONS:
 				}
 				else
 				{
-					options.Logger.Invoke("Failed to detect PlatformTarget and BuildConfiguration.", 0, 0);
+					options.Logger.Invoke(null, new("Failed to detect PlatformTarget and BuildConfiguration.", 0, 0, 0));
 					return 1;
 				}
 			}
@@ -193,16 +193,16 @@ OPTIONS:
 				{
 					if (pt != options.PlatformTarget)
 					{
-						options.Logger.Invoke($"WARNING: Detected PlatformTarget ({pt}) does not match the specified one", 0, 0);
+						options.Logger.Invoke(null, new($"WARNING: Detected PlatformTarget ({pt}) does not match the specified one", 0, 0, 0));
 					}
 					if (bc != options.BuildConfiguration)
 					{
-						options.Logger.Invoke($"WARNING: Detected BuildConfiguration ({bc}) does not match the specified one", 0, 0);
+						options.Logger.Invoke(null, new($"WARNING: Detected BuildConfiguration ({bc}) does not match the specified one", 0, 0, 0));
 					}
 				}
 				else
 				{
-					options.Logger.Invoke("WARNING: Failed to detect PlatformTarget and BuildConfiguration.", 0, 0);
+					options.Logger.Invoke(null, new("WARNING: Failed to detect PlatformTarget and BuildConfiguration.", 0, 0, 0));
 				}
 			}
 
@@ -251,7 +251,7 @@ OPTIONS:
 						}
 						else
 						{
-							options.Logger?.Invoke($"Could not find installation info file in '{fi.FullName}'", 0, 0);
+							options.Logger?.Invoke(null, new($"Could not find installation info file in '{fi.FullName}'", 0, 0, 0));
 						}
 					}
 				}

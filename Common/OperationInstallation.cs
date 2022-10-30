@@ -8,7 +8,7 @@ namespace UT4UU.Installer.Common
 {
 	public class OperationInstallation : Operation
 	{
-		public OperationInstallation(Options options, bool isInstalling) : base("Install UT4UU", "Uninstall UT4UU", options, isInstalling)
+		public OperationInstallation(Options options, bool isInstalling, int depth = 0) : base("Install UT4UU", "Uninstall UT4UU", depth, options, isInstalling)
 		{
 			string srcEngine = Path.Combine(options.SourceLocation, "Engine", "Binaries", options.PlatformTarget.ToString());
 			string srcPluginRoot = Path.Combine(options.SourceLocation, "UnrealTournament", "Plugins", "UT4UU");

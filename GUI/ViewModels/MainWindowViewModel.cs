@@ -377,13 +377,13 @@ namespace UT4UU.Installer.GUI.ViewModels
 			installOptions.CreateShortcut = true;
 			installOptions.RefreshingExperience = true;
 			installOptions.TryToInstallInLocalGameServer = true;
-			installOptions.Logger = (string message, int taskIndex, int taskCount) =>
+			installOptions.Logger = (object? sender, Options.LogEventArgs e) =>
 			{
 
-				progress = taskIndex / (double)taskCount;
+				progress = e.TaskIndex / (double)e.TaskCount;
 
 				// poor man's error message detection
-				string messageLower = message.ToLower();
+				string messageLower = e.Message.ToLower();
 				bool isError =
 					messageLower.Contains("fail") ||
 					messageLower.Contains("warning") ||
@@ -395,13 +395,13 @@ namespace UT4UU.Installer.GUI.ViewModels
 
 				if (isError)
 				{
-					logMessages.Add(new LogMessageError(message));
-					logFileStream?.WriteLine($"[{DateTime.UtcNow}] Err: {message}");
+					logMessages.Add(new(e.Message));
+					logFileStream?.WriteLine($"[{DateTime.UtcNow}] Err: {e.Message}");
 				}
 				else
 				{
-					logMessages.Add(new LogMessageInfo(message));
-					logFileStream?.WriteLine($"[{DateTime.UtcNow}] Log: {message}");
+					logMessages.Add(new(e.Message));
+					logFileStream?.WriteLine($"[{DateTime.UtcNow}] Log: {e.Message}");
 				}
 
 				this.RaisePropertyChanged("Progress");
