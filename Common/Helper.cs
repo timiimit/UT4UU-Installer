@@ -23,6 +23,8 @@ namespace UT4UU.Installer.Common
 		ShippingServer,
 		DevelopmentEditor,
 	}
+
+
 	public static class Helper
 	{
 		internal static PlatformTarget[] GetPlatformTargets()
@@ -250,17 +252,22 @@ namespace UT4UU.Installer.Common
 
 		public static string? TryFindInstallationLocation()
 		{
-			var platforms = GetPlatformTargets();
-			var configs = GetBuildConfigurations();
-			for (int i = 0; i < platforms.Length; i++)
-			{
-				for (int j = 0; j < configs.Length; j++)
-				{
-					string? installLocation = TryFindInstallationLocationForPlatform(platforms[i], configs[j]);
-					if (installLocation != null)
-						return installLocation;
-				}
-			}
+			// try all supported combinations
+			string? installLocation = TryFindInstallationLocationForPlatform(PlatformTarget.Win64, BuildConfiguration.Shipping);
+			if (installLocation != null)
+				return installLocation;
+			installLocation = TryFindInstallationLocationForPlatform(PlatformTarget.Win64, BuildConfiguration.ShippingServer);
+			if (installLocation != null)
+				return installLocation;
+			installLocation = TryFindInstallationLocationForPlatform(PlatformTarget.Win64, BuildConfiguration.DevelopmentEditor);
+			if (installLocation != null)
+				return installLocation;
+			installLocation = TryFindInstallationLocationForPlatform(PlatformTarget.Linux, BuildConfiguration.Shipping);
+			if (installLocation != null)
+				return installLocation;
+			installLocation = TryFindInstallationLocationForPlatform(PlatformTarget.Linux, BuildConfiguration.ShippingServer);
+			if (installLocation != null)
+				return installLocation;
 			return null;
 		}
 
