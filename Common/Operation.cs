@@ -140,6 +140,18 @@ namespace UT4UU.Installer.Common
 			}
 		}
 
+		protected void AddCopyTask(string srcDir, string dstDir, string filename)
+		{
+			if (Options.CreateSymbolicLinks)
+			{
+				tasks.Add(new TaskCreateSymbolicLink(Path.Combine(dstDir, filename), Path.Combine(srcDir, filename)));
+			}
+			else
+			{
+				tasks.Add(new TaskCopyFile(Path.Combine(srcDir, filename), Path.Combine(dstDir, filename)));
+			}
+		}
+
 		public override void Do()
 		{
 			InternalDo(doDirection);
