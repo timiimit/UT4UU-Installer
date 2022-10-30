@@ -113,7 +113,7 @@ namespace UT4UU.Installer.Common
 				{
 					subOptions.PlatformTarget = pt;
 					subOptions.BuildConfiguration = BuildConfiguration.ShippingServer;
-					var subInstallation = new OperationInstallation(subOptions, true) { CanFail = true };
+					var subInstallation = new OperationInstallation(subOptions, true, OperationDepth + 1) { CanFail = true };
 					tasks.Add(subInstallation);
 
 					// don't think we can unwrap the sub installation due to this whole operation being optional.

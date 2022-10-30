@@ -364,12 +364,21 @@ namespace UT4UU.Installer.GUI.ViewModels
 
 		private StreamWriter? logFileStream;
 
+		private class PerOperationDepthInfo
+		{
+			public int TaskIndex { get; set; }
+			public int TaskCount { get; set; }
+			
+		}
+		private List<PerOperationDepthInfo> progressPerOperationDepth;
+
 		public MainWindowViewModel()
 		{
 			isInstallationSuccessful = false;
 			errorMessage = string.Empty;
 			byte[] buffer = new byte[1024 * 1024];
 			logMessages = new ObservableCollection<LogMessage>();
+			progressPerOperationDepth = new();
 			CanExit = true;
 
 			installOptions = new Options();
@@ -379,8 +388,34 @@ namespace UT4UU.Installer.GUI.ViewModels
 			installOptions.TryToInstallInLocalGameServer = true;
 			installOptions.Logger = (object? sender, Options.LogEventArgs e) =>
 			{
+				// remove exccess depth
+				while (progressPerOperationDepth.Count > e.OperationDepth + 1)
+				{
+					progressPerOperationDepth.RemoveAt(progressPerOperationDepth.Count - 1);
+				}
+				// add multi depth steps
+				while (progressPerOperationDepth.Count < e.OperationDepth)
+				{
+					progressPerOperationDepth.Add(new() { TaskIndex = 0, TaskCount = 1 });
+				}
+				// add current depth
+				if (progressPerOperationDepth.Count == e.OperationDepth)
+				{
+					progressPerOperationDepth.Add(new());
+				}
+				// update current depth info
+				progressPerOperationDepth[e.OperationDepth].TaskIndex = e.TaskIndex;
+				progressPerOperationDepth[e.OperationDepth].TaskCount = e.TaskCount;
 
-				progress = e.TaskIndex / (double)e.TaskCount;
+				// calculate current progress
+				progress = 0;
+				for (int i = 0; i < progressPerOperationDepth.Count; i++)
+				{
+					double depthProgress = progressPerOperationDepth[i].TaskIndex / (double)progressPerOperationDepth[i].TaskCount;
+					if (i > 0)
+						depthProgress *= 1.0 / progressPerOperationDepth[i-1].TaskCount;
+					progress += depthProgress;
+				}
 
 				// poor man's error message detection
 				string messageLower = e.Message.ToLower();
@@ -393,15 +428,23 @@ namespace UT4UU.Installer.GUI.ViewModels
 					messageLower.Contains("can't") ||
 					messageLower.Contains("could not");
 
+
+				for (int i = 0; i < e.OperationDepth; i++)
+				{
+					e.Message = "    " + e.Message;
+				}
+
 				if (isError)
 				{
-					logMessages.Add(new(e.Message));
-					logFileStream?.WriteLine($"[{DateTime.UtcNow}] Err: {e.Message}");
+					logFileStream?.Write($"[{DateTime.UtcNow}] Err: ");
+					logMessages.Add(new LogMessageError(e.Message));
+					logFileStream?.WriteLine(e.Message);
 				}
 				else
 				{
-					logMessages.Add(new(e.Message));
-					logFileStream?.WriteLine($"[{DateTime.UtcNow}] Log: {e.Message}");
+					logFileStream?.Write($"[{DateTime.UtcNow}] Log: ");
+					logMessages.Add(new LogMessageInfo(e.Message));
+					logFileStream?.WriteLine(e.Message);
 				}
 
 				this.RaisePropertyChanged("Progress");

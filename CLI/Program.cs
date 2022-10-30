@@ -98,11 +98,14 @@ OPTIONS:
 			options.SourceLocation = Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly()?.Location) ?? Environment.CurrentDirectory, "Files");
 			options.Logger = (object? sender, Options.LogEventArgs e) =>
 			{
+				for (int i = 0; i < e.OperationDepth; i++)
+				{
+					Console.Write("    ");
+				}
 				Console.WriteLine(e.Message);
 			};
 
 #if DEBUG
-			options.IsDryRun = true; // for debugging
 			options.InstallLocation = "E:/UT4Source/TestGameDir";
 			options.SourceLocation = "E:/UT4Source/UT4UU/Source/Programs/Installer/Files";
 #endif
