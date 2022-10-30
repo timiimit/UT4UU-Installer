@@ -368,7 +368,7 @@ namespace UT4UU.Installer.GUI.ViewModels
 		{
 			public int TaskIndex { get; set; }
 			public int TaskCount { get; set; }
-			
+
 		}
 		private List<PerOperationDepthInfo> progressPerOperationDepth;
 
@@ -413,7 +413,7 @@ namespace UT4UU.Installer.GUI.ViewModels
 				{
 					double depthProgress = progressPerOperationDepth[i].TaskIndex / (double)progressPerOperationDepth[i].TaskCount;
 					if (i > 0)
-						depthProgress *= 1.0 / progressPerOperationDepth[i-1].TaskCount;
+						depthProgress *= 1.0 / progressPerOperationDepth[i - 1].TaskCount;
 					progress += depthProgress;
 				}
 
@@ -507,6 +507,7 @@ namespace UT4UU.Installer.GUI.ViewModels
 			CanExit = false;
 			logFileStream = new StreamWriter(new FileStream("LastInstallation.log", FileMode.Append, FileAccess.Write, FileShare.Read));
 			logFileStream.WriteLine("-------------------- START OF LOG --------------------");
+			installOptions.WriteOptions(logFileStream);
 
 			if (Helper.IsUT4UUInstalled(installOptions.InstallLocation))
 			{

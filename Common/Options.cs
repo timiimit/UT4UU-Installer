@@ -58,6 +58,21 @@ namespace UT4UU.Installer.Common
 			Logger = null;
 		}
 
+		public void WriteOptions(StreamWriter w)
+		{
+			w.WriteLine($"{nameof(CreateShortcut)} = {CreateShortcut}");
+			w.WriteLine($"{nameof(IsDryRun)} = {IsDryRun}");
+			w.WriteLine($"{nameof(CreateSymbolicLinks)} = {CreateSymbolicLinks}");
+			w.WriteLine($"{nameof(UpgradeEngineModules)} = {UpgradeEngineModules}");
+			w.WriteLine($"{nameof(RefreshingExperience)} = {RefreshingExperience}");
+			w.WriteLine($"{nameof(TryToInstallInLocalGameServer)} = {TryToInstallInLocalGameServer}");
+			w.WriteLine($"{nameof(SourceLocation)} = {SourceLocation}");
+			w.WriteLine($"{nameof(InstallLocation)} = {InstallLocation}");
+			w.WriteLine($"{nameof(ReplacementSuffix)} = {ReplacementSuffix}");
+			w.WriteLine($"{nameof(PlatformTarget)} = {PlatformTarget}");
+			w.WriteLine($"{nameof(BuildConfiguration)} = {BuildConfiguration}");
+		}
+
 		public void Save(string filepath)
 		{
 			using (var w = new BinaryWriter(new FileStream(filepath, FileMode.Create, FileAccess.Write, FileShare.Read)))

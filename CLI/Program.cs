@@ -226,6 +226,10 @@ OPTIONS:
 				string[] optionArguments = new string[args.Length - 1];
 				Array.Copy(args, 1, optionArguments, 0, optionArguments.Length);
 				result = ParseArguments(optionArguments, ref options);
+				using (var stdout = new StreamWriter(Console.OpenStandardOutput()))
+				{
+					options.WriteOptions(stdout);
+				}
 
 				if (result == 0)
 				{
