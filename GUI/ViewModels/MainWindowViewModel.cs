@@ -377,11 +377,11 @@ namespace UT4UU.Installer.GUI.ViewModels
 			isInstallationSuccessful = false;
 			errorMessage = string.Empty;
 			byte[] buffer = new byte[1024 * 1024];
-			logMessages = new ObservableCollection<LogMessage>();
+			logMessages = new();
 			progressPerOperationDepth = new();
 			CanExit = true;
 
-			installOptions = new Options();
+			installOptions = new();
 			installOptions.UpgradeEngineModules = true;
 			installOptions.CreateShortcut = true;
 			installOptions.RefreshingExperience = true;
@@ -396,7 +396,7 @@ namespace UT4UU.Installer.GUI.ViewModels
 				// add multi depth steps
 				while (progressPerOperationDepth.Count < e.OperationDepth)
 				{
-					progressPerOperationDepth.Add(new() { TaskIndex = 0, TaskCount = 1 });
+					progressPerOperationDepth.Add(new() { TaskIndex = (cacheUT4UUVersionText == null ? 0 : 1), TaskCount = 1 });
 				}
 				// add current depth
 				if (progressPerOperationDepth.Count == e.OperationDepth)
@@ -505,74 +505,83 @@ namespace UT4UU.Installer.GUI.ViewModels
 			}
 
 			CanExit = false;
-			logFileStream = new StreamWriter(new FileStream("LastInstallation.log", FileMode.Append, FileAccess.Write, FileShare.Read));
-			logFileStream.WriteLine("-------------------- START OF LOG --------------------");
-			installOptions.WriteOptions(logFileStream);
-
-			if (Helper.IsUT4UUInstalled(installOptions.InstallLocation))
+			try
 			{
-				bool isHandlableUT4UUInstalled = Helper.IsExpectedUT4UUVersionInstalled(
-					installOptions.InstallLocation,
-					installOptions.SourceLocation
-				);
-				if (isHandlableUT4UUInstalled)
+				using (logFileStream = new StreamWriter(new FileStream("LastInstallation.log", FileMode.Append, FileAccess.Write, FileShare.Read)))
 				{
-					operation = new OperationUninstall(installOptions);
-					try
-					{
-						operation.Do();
-						isInstallationSuccessful = true;
-					}
-					catch
-					{
-						isInstallationSuccessful = false;
-					}
-				}
-				else
-				{
-					string? installedVersion = Helper.GetUT4UUInstalledVersionName(installOptions.InstallLocation);
-					string? sourceVersion = Helper.GetUT4UUInstalledVersionName(installOptions.SourceLocation);
-					if (installedVersion == null)
-						installedVersion = "<Unknown>";
-					if (sourceVersion == null)
-						sourceVersion = "<Unknown>";
+					logFileStream.WriteLine("-------------------- START OF LOG --------------------");
+					installOptions.WriteOptions(logFileStream);
 
-					ErrorMessage = $"This installer can only uninstall version '{sourceVersion}' of UT4UU";
-					SelectedPageIndex = 0;
+					if (Helper.IsUT4UUInstalled(installOptions.InstallLocation))
+					{
+						bool isHandlableUT4UUInstalled = Helper.IsExpectedUT4UUVersionInstalled(
+							installOptions.InstallLocation,
+							installOptions.SourceLocation
+						);
+						if (isHandlableUT4UUInstalled)
+						{
+							operation = new OperationUninstall(installOptions);
+							try
+							{
+								operation.Do();
+								isInstallationSuccessful = true;
+							}
+							catch
+							{
+								isInstallationSuccessful = false;
+							}
+						}
+						else
+						{
+							string? installedVersion = Helper.GetUT4UUInstalledVersionName(installOptions.InstallLocation);
+							string? sourceVersion = Helper.GetUT4UUInstalledVersionName(installOptions.SourceLocation);
+							if (installedVersion == null)
+								installedVersion = "<Unknown>";
+							if (sourceVersion == null)
+								sourceVersion = "<Unknown>";
+
+							ErrorMessage = $"This installer can only uninstall version '{sourceVersion}' of UT4UU";
+							SelectedPageIndex = 0;
+						}
+					}
+					else
+					{
+						bool isUTDir = Helper.IsUTDirectory(
+							installOptions.InstallLocation,
+							installOptions.PlatformTarget,
+							installOptions.BuildConfiguration
+						);
+						if (isUTDir)
+						{
+							// begin to install
+							operation = new OperationInstall(installOptions);
+							try
+							{
+								operation.Do();
+								isInstallationSuccessful = true;
+							}
+							catch
+							{
+								isInstallationSuccessful = false;
+							}
+						}
+						else
+						{
+							ErrorMessage = $"Tried to install into non-UT4 related directory";
+							SelectedPageIndex = 0;
+						}
+					}
 				}
 			}
-			else
+			catch (Exception ex)
 			{
-				bool isUTDir = Helper.IsUTDirectory(
-					installOptions.InstallLocation,
-					installOptions.PlatformTarget,
-					installOptions.BuildConfiguration
-				);
-				if (isUTDir)
-				{
-					// begin to install
-					operation = new OperationInstall(installOptions);
-					try
-					{
-						operation.Do();
-						isInstallationSuccessful = true;
-					}
-					catch
-					{
-						isInstallationSuccessful = false;
-					}
-				}
-				else
-				{
-					ErrorMessage = $"Tried to install into non-UT4 related directory";
-					SelectedPageIndex = 0;
-				}
+				ErrorMessage = $"{ex.Message}";
+				SelectedPageIndex = 0;
 			}
-
-			logFileStream.Dispose();
-			logFileStream = null;
-
-			operation = null;
+			finally
+			{
+				operation = null;
+			}
 			CanExit = true;
 		}
 	}

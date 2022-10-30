@@ -65,7 +65,8 @@
 					</Grid>
 
 					<Grid Grid.Row="1">
-						<TextBlock Margin="10" HorizontalAlignment="Center" Text="{Binding ErrorMessage}" IsVisible="{Binding IsErrorMessageVisible}" Foreground="Red" />
+						<TextBlock Margin="10" HorizontalAlignment="Center" Text="{Binding ErrorMessage}"
+								   IsVisible="{Binding IsErrorMessageVisible}" Foreground="Red" TextWrapping="Wrap" />
 					</Grid>
 
 					<Grid Grid.Row="2" ColumnDefinitions="1*,2*,2*,2*,1*">
