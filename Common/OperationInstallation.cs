@@ -80,19 +80,8 @@ namespace UT4UU.Installer.Common
 
 			if (options.RefreshingExperience && options.BuildConfiguration == BuildConfiguration.Shipping)
 			{
-				tasks.Add(new TaskRenameFile(
-					Path.Combine(dstMovies, "engine_startup.mp4"),
-					"engine_startup.mp4" + Options.ReplacementSuffix
-				));
-				tasks.Add(new TaskRenameFile(
-					Path.Combine(dstMovies, "intro_full.mp4"),
-					"engine_startup.mp4"
-				));
-				tasks.Add(new TaskRenameFile(
-					Path.Combine(dstSplash, "Splash.bmp"),
-					"Splash.bmp" + options.ReplacementSuffix
-				));
-				AddCopyTask(srcSplash, dstSplash, "Splash.bmp");
+				var subInstallation = new OperationRefreshingExperience(OperationDepth + 1, options, true);
+				tasks.Add(subInstallation);
 			}
 
 			if (options.TryToInstallInLocalGameServer && options.BuildConfiguration == BuildConfiguration.Shipping)
@@ -148,18 +137,6 @@ namespace UT4UU.Installer.Common
 				filename + Options.ReplacementSuffix
 			));
 			AddCopyTask(srcDir, targetDir, filename);
-		}
-
-		private void AddCopyTask(string srcDir, string dstDir, string filename)
-		{
-			if (Options.CreateSymbolicLinks)
-			{
-				tasks.Add(new TaskCreateSymbolicLink(Path.Combine(dstDir, filename), Path.Combine(srcDir, filename)));
-			}
-			else
-			{
-				tasks.Add(new TaskCopyFile(Path.Combine(srcDir, filename), Path.Combine(dstDir, filename)));
-			}
 		}
 	}
 }
