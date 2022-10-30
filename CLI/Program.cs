@@ -245,6 +245,8 @@ OPTIONS:
 						{
 							// read stored install info
 							var installInfo = Options.Load(fi.FullName);
+
+							// copy over some uninstall customizable options
 							installInfo.SourceLocation = options.SourceLocation;
 							installInfo.IsDryRun = options.IsDryRun;
 							installInfo.Logger = options.Logger;

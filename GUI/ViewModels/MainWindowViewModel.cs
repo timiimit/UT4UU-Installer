@@ -520,15 +520,36 @@ namespace UT4UU.Installer.GUI.ViewModels
 						);
 						if (isHandlableUT4UUInstalled)
 						{
-							operation = new OperationUninstall(installOptions);
-							try
+							FileInfo fi = new FileInfo(Helper.GetInstallInfoFile(installOptions.InstallLocation));
+							if (fi.Exists)
 							{
-								operation.Do();
-								isInstallationSuccessful = true;
+								// read stored install info
+								var installInfo = Options.Load(fi.FullName);
+
+								// copy over some uninstall customizable options
+								installInfo.SourceLocation = installOptions.SourceLocation;
+								installInfo.IsDryRun = installOptions.IsDryRun;
+								installInfo.Logger = installOptions.Logger;
+								installOptions = installInfo;
 							}
-							catch
+
+							if (fi.Exists || installOptions.IsDryRun)
 							{
-								isInstallationSuccessful = false;
+								operation = new OperationUninstall(installOptions);
+								try
+								{
+									operation.Do();
+									isInstallationSuccessful = true;
+								}
+								catch
+								{
+									isInstallationSuccessful = false;
+								}
+							}
+							else
+							{
+								ErrorMessage = $"Could not find installation info file in '{fi.FullName}'";
+								SelectedPageIndex = 0;
 							}
 						}
 						else

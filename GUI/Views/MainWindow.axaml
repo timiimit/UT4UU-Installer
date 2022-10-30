@@ -13,7 +13,7 @@
 		MinWidth="600" MinHeight="450"
 		SystemDecorations="BorderOnly"
 		WindowStartupLocation="CenterScreen"
-		Background="#101010">
+		Background="#101010" WindowState="Normal">
 	<Window.Styles>
 	</Window.Styles>
 
