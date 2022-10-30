@@ -118,18 +118,13 @@ namespace UT4UU.Installer.Common
 					switch (config)
 					{
 						case BuildConfiguration.Shipping:
-							throw new NotImplementedException();
-						//return "";
+							return "DF6717A291B06F5F02CC096955916857C3FE8DA707BD077321A126E85D6AC9A0";
 						case BuildConfiguration.ShippingServer:
-							throw new NotImplementedException();
-							//return "";
-							//case BuildConfiguration.DevelopmentEditor:
-							//	return "";
+							return "496D76F3DD9E4ED8786A0FE6D4231E1F7552EB55FA26D51F7BA6F65DE06C3E9A";
 					}
 					break;
 			}
-
-			return string.Empty;
+			throw new NotImplementedException();
 		}
 
 
@@ -271,9 +266,9 @@ namespace UT4UU.Installer.Common
 
 		public static string? TryFindInstallationLocationForPlatform(PlatformTarget platformTarget, BuildConfiguration buildConfiguration)
 		{
-			Regex regex = new Regex("unreal|tournament|ut|ue4", RegexOptions.IgnoreCase);
+			Regex regexUT = new Regex("unreal|tournament|ut|ue4", RegexOptions.IgnoreCase);
 
-			string[] searchDirs;
+			List<string> searchDirs;
 			string? rootDir = Path.GetPathRoot(Environment.SystemDirectory);
 
 			if (Environment.OSVersion.Platform == PlatformID.Win32NT)
@@ -282,7 +277,7 @@ namespace UT4UU.Installer.Common
 
 				// SpecialFolder.ProgramFilesX86 and SpecialFolder.ProgramFiles return the same path
 				// for some reason, so use ExpandEnvironmentVariables instead
-				searchDirs = new string[]
+				searchDirs = new(new[]
 				{
 					Environment.ExpandEnvironmentVariables(@"%ProgramW6432%\Epic Games"),
 					Environment.ExpandEnvironmentVariables(@"%ProgramFiles(x86)%\Epic Games"),
@@ -292,18 +287,48 @@ namespace UT4UU.Installer.Common
 					Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
 					Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
 					Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
-				};
+				});
+
+				string launcherInstalled = Path.Combine(rootDir, "ProgramData", "Epic", "UnrealEngineLauncher", "LauncherInstalled.dat");
+				if (File.Exists(launcherInstalled))
+				{
+					//string? appName = null;
+					string? itemId = null;
+
+					if (buildConfiguration == BuildConfiguration.Shipping)
+					{
+						//appName = "UnrealTournamentDev";
+						itemId = "b8538c739273426aa35a98220e258d55";
+					}
+					else if (buildConfiguration == BuildConfiguration.DevelopmentEditor)
+					{
+						//appName = "UnrealTournamentEditor";
+						itemId = "0cae1a97d47f4ee2ba4e112b9601637f";
+					}
+
+					if (itemId != null)
+					{
+						string jsonString = File.ReadAllText(launcherInstalled);
+						Regex regexInstallLocationFinder = new Regex($"\"InstallLocation\"\\s*?:\\s*?\"(.+?)\"(,\\r\\n.+?){{2}}\"ItemId\"\\s*:\\s*\"{itemId}\"");
+						Match match = regexInstallLocationFinder.Match(jsonString);
+						if (match.Success)
+						{
+							string installLocation = match.Groups[1].Value.Replace(@"\\", @"\");
+							searchDirs.Insert(0, installLocation);
+						}
+					}
+				}
 			}
 			else if (Environment.OSVersion.Platform == PlatformID.Unix)
 			{
 				// set some possible installation directories
 				rootDir ??= "/";
-				searchDirs = new string[]
+				searchDirs = new(new[]
 				{
 					rootDir,
 					"/opt",
 					"~",
-				};
+				});
 			}
 			else
 			{
@@ -314,12 +339,12 @@ namespace UT4UU.Installer.Common
 			// search for install directory
 			Func<string, bool> funcValidator = (string s) => { return IsUTDirectory(s, platformTarget, buildConfiguration); };
 			string? utDirectory;
-			for (int i = 0; i < searchDirs.Length; i++)
+			for (int i = 0; i < searchDirs.Count; i++)
 			{
 				utDirectory = searchDirs[i];
 				if (Directory.Exists(utDirectory))
 				{
-					utDirectory = SearchForDirectory(utDirectory, 1, regex, funcValidator);
+					utDirectory = SearchForDirectory(utDirectory, 1, regexUT, funcValidator);
 					if (utDirectory != null)
 						return utDirectory;
 				}
@@ -338,7 +363,7 @@ namespace UT4UU.Installer.Common
 						if (di.FullName == rootDir)
 							continue; // already checked
 
-						utDirectory = SearchForDirectory(di.FullName, 1, regex, funcValidator);
+						utDirectory = SearchForDirectory(di.FullName, 1, regexUT, funcValidator);
 						if (utDirectory != null)
 							return utDirectory;
 					}
@@ -347,11 +372,11 @@ namespace UT4UU.Installer.Common
 			else if (Environment.OSVersion.Platform == PlatformID.Unix)
 			{
 				// search in commonly installed locations
-				searchDirs = new string[]
+				searchDirs = new(new[]
 				{
 					"/usr/bin",
 					"/usr/local/bin"
-				};
+				});
 
 				string executableName = GetGameExecutableName(platformTarget, buildConfiguration);
 
@@ -376,7 +401,7 @@ namespace UT4UU.Installer.Common
 							continue;
 
 						// if is not really what we expect, skip
-						if (!regex.IsMatch(filepath))
+						if (!regexUT.IsMatch(filepath))
 							continue;
 
 						if (IsUTExecutable(filepath, platformTarget, buildConfiguration))
