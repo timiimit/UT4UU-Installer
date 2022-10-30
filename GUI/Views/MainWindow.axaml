@@ -33,10 +33,10 @@
 					<Grid Grid.Row="0">
 						<StackPanel VerticalAlignment="Center">
 							<TextBlock Grid.Row="0" Margin="10" TextWrapping="Wrap" xml:space="default">
-								Please enter the location where game, server or editor was installed. By default, all new features that UT4UU provides will be installed. Feel free to customize your installation.
+								Please enter a location where game, server or editor was installed. By default, all new features that UT4UU provides will be installed. Feel free to customize your installation.
 							</TextBlock>
 							<TextBlock Grid.Row="0" Margin="10" TextWrapping="Wrap" xml:space="default">
-								To Uninstall, enter the location where UT4UU was previously installed.
+								To Uninstall, enter a location where UT4UU was previously installed.
 							</TextBlock>
 							<Grid ColumnDefinitions="1*,Auto">
 								<TextBox Grid.Column="0" Margin="10" Watermark="{Binding InstallLocationWatermark}" Text="{Binding InstallLocation, Mode=TwoWay}" />
