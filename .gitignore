@@ -10,3 +10,6 @@ Release/
 
 # exclude installation files
 Files/
+
+# exclude publishing files which change all the time and we dont need them in git
+/**/FolderProfile.pubxml.user

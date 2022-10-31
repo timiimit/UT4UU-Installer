@@ -22,15 +22,19 @@ namespace UT4UU.Installer.Common
 				Path.Combine(dstMovies, "engine_startup.mp4"),
 				"engine_startup.mp4" + Options.ReplacementSuffix
 			));
-			tasks.Add(new TaskRenameFile(
-				Path.Combine(dstMovies, "intro_full.mp4"),
-				"engine_startup.mp4"
-			));
+			AddCopyTask(srcMovies, dstMovies, "engine_startup.mp4");
+
+
+			// when it comes to splash image, it seems that png takes
+			// presedence over bmp image. so, we don't *need* to rename
+			// the original, we could just place the png besides it.
+			// we rename it for completeness.
+
 			tasks.Add(new TaskRenameFile(
 				Path.Combine(dstSplash, "Splash.bmp"),
 				"Splash.bmp" + options.ReplacementSuffix
 			));
-			AddCopyTask(srcSplash, dstSplash, "Splash.bmp");
+			AddCopyTask(srcSplash, dstSplash, "Splash.png");
 		}
 	}
 }
